@@ -26,18 +26,24 @@ base_route_app = "app"
 
 [client]
 
-[plugins.byllm.model]
-default_model = "gpt-4o-mini"
-
-[plugins.byllm.call_params]
-temperature = 0.1
-max_tokens = 1200
-
-[plugins.byllm.litellm]
-drop_params = true
-debug = false
-
-[plugins.byllm]
+# --- byLLM ---
+# The key path is `[byllm.*]`, NOT `[plugins.byllm.*]`. Verified by execution:
+# under `[plugins.byllm.model]` the config is silently IGNORED and every call
+# falls through to litellm's OpenAI default ("OpenAIException - Missing
+# credentials"). Under `[byllm.model]` it correctly routes to Anthropic.
+# See INTEGRATION.md risk #8. Do not "tidy" this back into [plugins.*].
+[byllm]
 system_prompt = """You are an authorization adjudicator for AI-agent payments.
 You reason from a signed human mandate and a proposed cart.
 Cite concrete evidence. Never approve on vibes; if evidence is thin, say uncertain."""
+
+[byllm.model]
+default_model = "anthropic/claude-sonnet-4-6"
+
+[byllm.call_params]
+temperature = 0.1
+max_tokens = 1200
+
+[byllm.litellm]
+drop_params = true
+debug = false

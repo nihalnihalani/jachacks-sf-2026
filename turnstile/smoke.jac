@@ -26,7 +26,7 @@ def build_chain() -> CapGate {
     }
 
     cap  = CapGate(label="CapGate", limit=500.0);
-    vel  = VelocityGate(label="VelocityGate", max_in_window=8);
+    vel  = VelocityGate(label="VelocityGate", max_in_window=5);
     sanc = SanctionsGate(label="SanctionsGate", blocklist=["Nordkraft Holdings", "Volga Trade LLC"]);
     intent = IntentMatchGate(
         label="IntentMatchGate",

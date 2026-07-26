@@ -41,7 +41,7 @@ node CapGate(ScreenGate) {
 }
 
 node VelocityGate(ScreenGate) {
-    has max_in_window: int = 8,
+    has max_in_window: int = 5,
         seen: int = 0;
 
     def judge(amount: float, merchant: str, category: str) -> Ruling {

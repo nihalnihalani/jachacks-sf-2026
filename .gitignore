@@ -23,3 +23,5 @@ build/
 jac/
 killBill/
 Sentinel/
+turnstile/out/
+turnstile/__pycache__/
