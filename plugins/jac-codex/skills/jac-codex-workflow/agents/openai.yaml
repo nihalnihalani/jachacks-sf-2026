@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jac Codex Workflow"
+  short_description: "Build and validate current Jac projects"
+  default_prompt: "Use $jac-codex-workflow to build and verify this Jac project."

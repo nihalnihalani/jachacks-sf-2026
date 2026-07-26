@@ -12,8 +12,9 @@ Built at **JacHacks San Francisco 2026** using Jac and byLLM.
 ## Agent Jac tooling
 
 The shared [Jac Codex setup](docs/jac-codex.md) connects the compiler through
-MCP and exports its version-matched guides as Codex skills. Run
-`./scripts/setup-jac-codex.sh` once, then restart Codex.
+MCP, exports version-matched guides, and installs the repository's
+[`jac-codex`](plugins/jac-codex/) plugin with automatic post-edit validation.
+Run `./scripts/setup-jac-codex.sh` once, then restart Codex.
 
 ## Agent UI tooling
 

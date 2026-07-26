@@ -1,0 +1,20 @@
+{
+  "name": "jachacks-sf-2026",
+  "interface": {
+    "displayName": "JacHacks SF 2026"
+  },
+  "plugins": [
+    {
+      "name": "jac-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/jac-codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

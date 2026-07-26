@@ -1,0 +1,29 @@
+{
+  "name": "jac-codex",
+  "version": "0.1.0",
+  "description": "Current Jac language skills, references, and automatic post-edit validation for Codex.",
+  "author": {
+    "name": "Yahya Alhinai",
+    "url": "https://github.com/yhinai"
+  },
+  "homepage": "https://docs.jaseci.org",
+  "repository": "https://github.com/jaseci-labs/jac",
+  "license": "MIT",
+  "keywords": ["jac", "jaseci", "codex", "agentic-ai", "full-stack"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Jac Codex",
+    "shortDescription": "Build modern Jac applications with validation",
+    "longDescription": "A self-contained Codex toolkit for building, migrating, debugging, testing, and validating current Jac applications across CLI, server, full-stack, mobile, desktop, native, and LLM-powered projects.",
+    "developerName": "Yahya Alhinai",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write", "Validation"],
+    "websiteURL": "https://docs.jaseci.org",
+    "defaultPrompt": [
+      "Build and verify a current Jac application",
+      "Migrate this Jac project to current syntax",
+      "Debug these Jac compiler diagnostics"
+    ],
+    "brandColor": "#7C3AED"
+  }
+}
