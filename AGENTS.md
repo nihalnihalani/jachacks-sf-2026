@@ -19,3 +19,48 @@ Use functions for pure computation and walkers for persistent graph traversal
 and workflows. Keep the graph load-bearing, use typed byLLM outputs with `sem`
 annotations, and enforce financial calculations and authorization
 deterministically.
+
+## Jac development
+
+Jac changes must use the installed compiler and its version-matched guidance.
+
+1. Run `jac --version`.
+2. Load `jac-core-cheatsheet` plus every relevant `jac-*` skill. Start with
+   `jac-project-kinds` when choosing architecture.
+3. Use `jac guide --search <topic>` when the installed skills do not answer a
+   syntax or compiler question.
+4. Use the `jac` MCP tools for documentation, validation, formatting, linting,
+   execution, and transpilation.
+5. Before completion run `jac check`, `jac check --lint`, `jac fmt`, and
+   `jac test` as applicable.
+
+Do not invent Jac syntax, substitute Python or JSX conventions, or rely on
+guidance from a different Jac version. Refresh Codex's skills after upgrading
+Jac with `jac guide --export ~/.codex/skills`.
+
+## 21st.dev UI workflows
+
+Before substantial UI work, read the project's existing components, tokens,
+spacing, naming, and responsive conventions. Reuse them instead of introducing
+a parallel design system.
+
+- Use `21st-ui-explore` when choosing a direction. Produce three meaningfully
+  different approaches, compare their trade-offs side by side, and wait for a
+  selection before implementing.
+- Use `21st-ui-build` to build or substantially change a page or component.
+  Reuse project primitives, pull proven patterns from 21st when useful, cover
+  loading/empty/error/long-content states, and verify light/dark plus mobile and
+  desktop before running typecheck and build.
+- Use `21st-ui-review` for UI audits. Report evidence, fix only
+  high-confidence defects, list judgment calls separately, and check both color
+  schemes.
+- Use `21st-design-sync` to publish project tokens. Confirm complete `:root`
+  and `.dark` blocks and inspect the published preview in both schemes.
+- Use `21st-registry` to publish or manage team components. Confirm imports and
+  dependencies, inspect every demo in light/dark, propose metadata changes
+  before applying them, and never delete or unpublish without explicit
+  approval.
+
+The repository config expects `API_KEY_21ST` in the environment. Never put a
+real API key in source control, prompts, logs, screenshots, or generated files.
+See `docs/21st.md` for setup and exact workflow templates.
