@@ -329,14 +329,51 @@ def _load_sanctions() -> dict {
         with open(SANCTIONS_PATH) as f {
             data = json.load(f);
         }
-        _sanctions_cache["names"] = [str(n).lower() for n in data.get("names", [])];
+        # The committed OFAC export is {"meta":..., "entities":[{name,norm,type,programs}]}.
+        # This previously read data["names"], which does not exist -- it silently
+        # got [] and fell through to the three-name stub below, so the "19,218
+        # real records" claim was true of the FILE and false of the RUNTIME.
+        # Never let a parse miss degrade quietly into a hardcoded list.
+        ents = data.get("entities", []);
+        _sanctions_cache["names"] = [
+            str(e.get("norm") or e.get("name") or "").lower()
+            for e in ents
+            if len(str(e.get("norm") or e.get("name") or "")) >= 5
+        ];
         _sanctions_cache["countries"] = [str(c).upper() for c in data.get("countries", [])];
+        _sanctions_cache["n"] = len(_sanctions_cache["names"]);
     } except Exception {
         # A missing file must never break the demo -- fall back to a cached slice.
         _sanctions_cache["names"] = ["garant bank", "nordvind logistics", "sunrise petro trading"];
         _sanctions_cache["countries"] = ["IR", "KP", "SY", "CU"];
     }
     return _sanctions_cache;
+}
+
+
+"""Pure SDN lookup for the gate chain. Returns the matched SDN name, or "".
+
+Separate from check_sanctions (the ReAct tool) because the gate must screen
+WITHOUT writing to the tribunal's evidence ledger -- the gate runs on every
+payment, the ledger belongs to an adjudication.
+"""
+def screen_sdn(merchant_name: str) -> str {
+    sdn = _load_sanctions();
+    ln = str(merchant_name).lower().strip();
+    if len(ln) < 5 {
+        return "";
+    }
+    for name in sdn.get("names", []) {
+        if name and (name in ln or ln in name) {
+            return name;
+        }
+    }
+    return "";
+}
+
+
+def sdn_count() -> int {
+    return len(_load_sanctions().get("names", []));
 }
 
 

@@ -15,7 +15,7 @@
 #                    \--Escalates--> TribunalGate --Next--> SettledGate
 # =============================================================
 
-import from tribunal { judge_intent, run_tribunal }
+import from tribunal { judge_intent, run_tribunal, screen_sdn, sdn_count }
 import from schema {
     Ruling, Principal, AgentIdentity, Treasury, Merchant, Mandate,
     Precedent, CaseFile, Gate, Payment,
@@ -81,10 +81,26 @@ node SanctionsGate(Gate) {
         watchlist: list[str] = [];
 
     can screen with Payment entry {
+        # REAL screening against the committed OFAC SDN export (~19k names).
+        # This gate is labelled "OFAC LOOKUP" on screen and previously matched
+        # a hardcoded two-name list, while the genuine 19,218-record dataset
+        # sat unread on disk -- the claim was true of the FILE and false of the
+        # RUNTIME. If the UI says a gate consults a real dataset, it must.
+        hit = screen_sdn(visitor.merchant);
+        if hit {
+            visitor.halt(
+                self.label, "BLOCKED",
+                f"'{visitor.merchant}' matches OFAC SDN entry "
+                + f"'{hit.upper()}' ({sdn_count()} names screened)"
+            );
+            disengage;
+        }
+        # Local override, kept so smoke can exercise a block deterministically
+        # without depending on a name staying on a list the Treasury controls.
         if visitor.merchant in self.sdn_list {
             visitor.halt(
                 self.label, "BLOCKED",
-                f"'{visitor.merchant}' is on the OFAC SDN list"
+                f"'{visitor.merchant}' is on the local sanctions override list"
             );
             disengage;
         }
