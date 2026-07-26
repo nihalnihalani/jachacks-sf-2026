@@ -14,9 +14,9 @@
 import from schema { Treasury, Payment }
 import from gates { seed_turnstile, reset_turnstile }
 
-def run(tre: Treasury, pid: str, amt: float, mer: str, cat: str) -> Payment {
+def run(tre: Treasury, pid: str, amt: float, mer: str, cat: str, agent: str = "shopper-01") -> Payment {
     p = Payment(
-        payment_id=pid, amount=amt, merchant=mer, category=cat,
+        payment_id=pid, amount=amt, merchant=mer, category=cat, agent_handle=agent,
         cart={"category": cat, "merchant": mer, "total": amt}
     );
     tre spawn p;
@@ -31,7 +31,7 @@ with entry {
         ("s1",  45.00, "FreshMart",           "grocery",     "SETTLED", "SettledGate"),
         ("s2", 340.00, "FreshMart",           "grocery",     "BLOCKED", "CapGate"),
         ("s3",  75.00, "Nordvik Trading OOO", "grocery",     "BLOCKED", "SanctionsGate"),
-        ("s4", 180.00, "QuickBuy Digital",    "gift_card",   "BLOCKED", "TribunalGate"),
+        ("s4", 180.00, "QuickBuy Digital",    "gift_card",   "BLOCKED", "TribunalGate", "shopper-01-sub"),
         ("s5",  60.00, "FreshMart",           "electronics", "REVIEW",  "TribunalGate"),
         ("s6", 150.00, "FreshMart",           "grocery",     "SETTLED", "SettledGate"),
         ("s7", 150.00, "FreshMart",           "grocery",     "SETTLED", "SettledGate"),
@@ -45,8 +45,11 @@ with entry {
 
     failures = 0;
     used = 0;
-    for (pid, amt, mer, cat, want_v, want_h) in cases {
-        p = run(tre, pid, amt, mer, cat);
+    for c in cases {
+        pid = c[0]; amt = c[1]; mer = c[2]; cat = c[3];
+        want_v = c[4]; want_h = c[5];
+        agent = c[6] if len(c) > 6 else "shopper-01";
+        p = run(tre, pid, amt, mer, cat, agent);
         used += p.tokens_used;
         ok = (p.verdict == want_v) and (p.halted_at == want_h);
         mark = "ok  ";

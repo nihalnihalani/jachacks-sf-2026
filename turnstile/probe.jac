@@ -19,6 +19,8 @@ same six code paths. The demo is identical either way.
 """
 
 import os;
+import from gates { seed_turnstile, reset_turnstile }
+import from schema { Payment }
 import from jaclang.byllm.lib {
     IterationAction,
     IterationContext,
@@ -663,8 +665,12 @@ def describe(a: Attack) -> str {
 }
 
 
+glob PROBE_AGENT: str = "shopper-01-sub";
+
 with entry:__main__ {
     reset_probe();
+    reset_turnstile();
+    tre = seed_turnstile();
     print(f"MANDATE: {MANDATE}");
     print(f"live={probe_is_live()}  max_attempts={PROBE_MAX_ATTEMPTS}\n");
 
@@ -685,9 +691,31 @@ with entry:__main__ {
         print(f"  -> {s.expect_reason}");
         print(f"  llm_calls={s.expect_llm_calls}");
 
-        if s.expect_verdict == "BLOCKED" {
-            record_rejection(s.expect_halted_at, s.expect_reason);
-            last = f"{s.expect_halted_at}: {s.expect_reason}";
+        # RUN IT FOR REAL. The probe used to feed itself its own scripted
+        # expectation, so `record_rejection` never saw a gate -- the agent was
+        # "adapting" to text we handed it. Spawning against the seeded chain
+        # means the rejection it learns from is the one the firewall actually
+        # produced, and a divergence between expectation and reality shows up
+        # on screen instead of hiding.
+        p = Payment(
+            payment_id=f"probe-{s.step}", amount=a.amount, merchant=a.merchant,
+            category=a.category, agent_handle=PROBE_AGENT,
+            # Carry the REAL line items. Building the cart from category alone
+            # discards exactly what the camouflage attack hides in -- a gift
+            # card buried among groceries -- and the semantic gate can only
+            # catch what it can see.
+            cart=(a.cart | {"category": a.category, "merchant": a.merchant,
+                            "total": a.amount})
+        );
+        tre spawn p;
+        print(f"  ACTUAL: {p.verdict} @ {p.halted_at or '(none)'} -- {p.reason}");
+        if p.verdict != s.expect_verdict or p.halted_at != s.expect_halted_at {
+            print(f"  ** diverged from script (expected {s.expect_verdict} @ {s.expect_halted_at})");
+        }
+
+        if p.verdict == "BLOCKED" or p.verdict == "REVIEW" {
+            record_rejection(p.halted_at, p.reason);
+            last = f"{p.halted_at}: {p.reason}";
         } else {
             record_settlement(a.amount);
             last = "";

@@ -15,7 +15,7 @@
 #                    \--Escalates--> TribunalGate --Next--> SettledGate
 # =============================================================
 
-import from tribunal { judge_intent }
+import from tribunal { judge_intent, run_tribunal }
 import from schema {
     Ruling, Principal, AgentIdentity, Treasury, Merchant, Mandate,
     Precedent, CaseFile, Gate, Payment,
@@ -190,20 +190,56 @@ node TribunalGate(Gate) {
     has quorum: int = 2;
 
     can screen with Payment entry {
-        risks = [s for s in visitor.signals if s.startswith("risk:")];
-        visitor.signals.append(f"tribunal:convened({len(risks)} signals)");
+        # Convene the real tribunal. `run_tribunal` runs the ReAct loop with
+        # four specialist tools and NEVER raises -- no key, dead key, timeout
+        # and doom-loop all fall through to a deterministic sweep that still
+        # fills the evidence ledger. That is why calling it here does not
+        # cost us the zero-key floor.
+        res = run_tribunal(
+            visitor.cart, visitor.mandate_text, visitor.signals,
+            visitor.agent_handle, visitor.merchant,
+            visitor.category, visitor.amount
+        );
+        visitor.tokens_used += res.tokens_used;
 
-        if len(risks) >= self.quorum {
-            visitor.halt(
-                self.label, "BLOCKED",
-                f"{len(risks)} corroborating signals: {risks}"
+        # Quorum is applied to INDEPENDENT EVIDENCE SOURCES, not to strings
+        # scraped off visitor.signals. Each source is a different subgraph or
+        # dataset (intent / provenance / sanctions / precedent), so two of
+        # them agreeing is genuine corroboration rather than one upstream
+        # gate having appended two similarly-prefixed lines.
+        srcs = res.adverse_sources;
+        mode = "live";
+        if not res.live { mode = "deterministic"; }
+        visitor.signals.append(
+            f"tribunal:convened({len(srcs)} sources, {mode})"
+        );
+
+        # BLOCK requires quorum AND the ruling. Either alone is REVIEW:
+        # evidence without a ruling is unadjudicated, and a ruling without
+        # corroboration is a model blocking on vibes.
+        # The EVIDENCE is always real -- each source is computed from this
+        # payment. The model's PROSE is not: offline it comes from a scripted
+        # transcript, so an electronics cart came back reasoned as a "stored-
+        # value gift card". That is the Hallucinating Investigator failure --
+        # a specific claim unsupported by the case -- and it is worse than
+        # saying less. Offline we therefore narrate the ledger instead.
+        why = res.ruling.reason;
+        if not res.live {
+            why = "; ".join(
+                [f"[{e['source']}] {e['detail']}" for e in res.evidence if e["adverse"]]
             );
+            if not why { why = "no adverse evidence found"; }
+        }
+
+        if len(srcs) >= self.quorum and res.ruling.blocked {
+            visitor.halt(self.label, "BLOCKED", why);
             disengage;
         }
-        if len(risks) == 1 {
+        if len(srcs) >= 1 or res.ruling.blocked or res.ruling.uncertain {
             visitor.halt(
                 self.label, "REVIEW",
-                f"single signal {risks}; below quorum {self.quorum} - escalated to human"
+                f"{len(srcs)} source(s) below quorum {self.quorum} "
+                + f"-- escalated to human: {why}"
             );
             disengage;
         }
@@ -305,7 +341,11 @@ def seed_turnstile() -> Treasury {
         mandate_text=man.intent_text,
         allowed=["grocery", "household"],
         forbidden=["crypto", "wire_transfer"],
-        use_llm=False
+        # LIVE. judge_intent degrades on its own -- no key or any exception
+        # falls back to the deterministic rules and returns tokens=0 -- so
+        # flipping this on cannot cost us the zero-key floor. With a key set,
+        # the intent gate reaches _judge_llm.
+        use_llm=True
     );
     g_san +>: Next() :+> g_int;
 

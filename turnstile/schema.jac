@@ -124,7 +124,15 @@ walker Payment {
     # Funds.meter may have disengaged us already. If we are here the
     # budget cleared -- step onto the head of the gate chain.
     can enter_chain with AgentIdentity entry {
-        self.agent_handle = here.handle;
+        # Only adopt the funded identity's handle when the caller did not name
+        # one. The caller-supplied handle is WHO INITIATED the charge, which
+        # may be a sub-agent; `here` is merely the identity whose treasury
+        # edge funds it. Overwriting silently relabels a sub-agent attack as
+        # its authorized parent, which is precisely the confused-deputy case
+        # trace_provenance exists to catch -- it made the attack invisible.
+        if not self.agent_handle {
+            self.agent_handle = here.handle;
+        }
         visit [->:Enters:->];
     }
 

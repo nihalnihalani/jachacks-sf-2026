@@ -569,6 +569,20 @@ def run_tribunal(cart: dict, mandate: str, chain: list[str],
     reset_budget();
     rearm_offline();
 
+    # NO MODEL CONFIGURED: run the four specialists directly against the REAL
+    # payment instead of driving MockLLM's scripted transcript.
+    #
+    # The transcript calls the tools with CANNED arguments (DEMO_CART_SUMMARY
+    # etc.), so offline an electronics cart came back reasoned as a "stored-
+    # value gift card" -- a specific claim unsupported by the case. Evidence
+    # must be derived from the payment in front of us or it is fabrication,
+    # and fabricated evidence is worse than an abstention. The convergence
+    # rule then runs on that real evidence exactly as it does when live.
+    if not TRIBUNAL_LIVE {
+        _deterministic_sweep(cart, mandate, agent_handle, merchant, category, amount);
+        return _finalize(_deterministic_proposal());
+    }
+
     try {
         proposed = _coerce_ruling(
             adjudicate(cart, mandate, chain),
@@ -641,7 +655,13 @@ def _finalize(proposed: Ruling) -> TribunalResult {
 # `Gate`, so `edge Escalates: Gate --> Gate` accepts it unchanged.
 # ============================================================================
 
-node TribunalGate {
+# RENAMED from TribunalGate. gates.jac declares `node TribunalGate(Gate)`
+# and imports this module, so both were in scope and one silently shadowed
+# the other -- the same trap `obj Attack` set earlier. gates.jac's copy is
+# the one attached to root, so IT keeps the name: renaming a persisted class
+# quarantines every anchor of the old name on next start. This copy has never
+# been instantiated, so it renames for free.
+node TribunalAdjudicator {
     has label: str = "TribunalGate",
         mandate_text: str = "",
         convened: int = 0;
@@ -681,8 +701,8 @@ node TribunalGate {
     }
 }
 
-sem TribunalGate.mandate_text = "The mandate this tribunal is enforcing, verbatim.";
-sem TribunalGate.deliberate = """
+sem TribunalAdjudicator.mandate_text = "The mandate this tribunal is enforcing, verbatim.";
+sem TribunalAdjudicator.deliberate = """
 You are the tribunal. A payment reached you because a cheaper gate could not
 decide it, and you hold the mandate the human signed on `self.mandate_text`.
 
@@ -696,8 +716,8 @@ that routes to a human, which is the correct outcome for a case one specialist
 can see and another cannot confirm. Never invent a finding a tool did not
 return, and never restate policy in `reason`: name the evidence.
 """;
-sem TribunalGate.deliberate.cart = "The assembled cart: item descriptions, categories, quantities and prices.";
-sem TribunalGate.deliberate.chain = "Signals already collected by the upstream deterministic gates.";
+sem TribunalAdjudicator.deliberate.cart = "The assembled cart: item descriptions, categories, quantities and prices.";
+sem TribunalAdjudicator.deliberate.chain = "Signals already collected by the upstream deterministic gates.";
 
 
 # ============================================================================
@@ -742,14 +762,24 @@ sem _judge_llm.mandate = "Verbatim text of the mandate the human signed.";
 
 """Zero-token intent check. This is the demo floor and it must never fail."""
 def _judge_rules(mandate: str, allowed: list[str], amount: float,
-                 merchant: str, category: str) -> Ruling {
+                 merchant: str, category: str, cart: dict = {}) -> Ruling {
+    # ESCALATE, never block outright. An out-of-category cart is exactly ONE
+    # signal, and the project's own rule is that one signal is never a block --
+    # it goes to the Tribunal, which decides on corroboration from independent
+    # sources. Returning blocked=True here short-circuits the convergence rule
+    # and quietly reinstates the single-signal blocking we criticise Sentinel
+    # for. A category mismatch is grounds for suspicion, not for a verdict.
     if allowed and category and category not in allowed {
         return Ruling(
-            blocked=True, uncertain=False, confidence=0.9, tokens=0,
+            blocked=False, uncertain=True, confidence=0.75, tokens=0,
             reason=f"mandate authorizes {allowed}; this cart is '{category}'"
         );
     }
-    probe = compare_to_intent(f"{category} from {merchant}, ${amount:.2f}", mandate);
+    # Summarise the REAL cart, not just its declared category. A camouflage
+    # attack hides a gift card among genuine groceries and declares the whole
+    # basket "grocery"; judging the label alone lets it through, which is the
+    # single most important thing this gate exists to stop.
+    probe = compare_to_intent(_cart_summary(cart, merchant, category, amount), mandate);
     if "MISMATCH" in probe {
         return Ruling(
             blocked=False, uncertain=True, confidence=0.55, tokens=0,
@@ -764,7 +794,7 @@ def _judge_rules(mandate: str, allowed: list[str], amount: float,
 def judge_intent(mandate: str, allowed: list[str], amount: float,
                  merchant: str, category: str, cart: dict = {}) -> Ruling {
     if not llm_live() {
-        return _judge_rules(mandate, allowed, amount, merchant, category);
+        return _judge_rules(mandate, allowed, amount, merchant, category, cart);
     }
     try {
         summary = _cart_summary(cart, merchant, category, amount);
@@ -773,7 +803,7 @@ def judge_intent(mandate: str, allowed: list[str], amount: float,
         r.tokens = 0;
         return r;
     } except Exception {
-        return _judge_rules(mandate, allowed, amount, merchant, category);
+        return _judge_rules(mandate, allowed, amount, merchant, category, cart);
     }
 }
 
@@ -793,6 +823,27 @@ def _cart_summary(cart: dict, merchant: str, category: str, amount: float) -> st
         }
         return f"From {merchant}: " + "; ".join(parts) + f". Total ${amount:.2f}";
     }
+
+    # Flat {item_name: price} carts (what the probe builds) were falling through
+    # to the generic summary below, which names only the DECLARED category. That
+    # made the camouflage attack undetectable by construction: a gift card
+    # itemised among groceries and declared "grocery" produced the summary
+    # "1x grocery" and the semantic gate had nothing to see. A gate can only
+    # catch what it is shown.
+    meta = ["category", "merchant", "total", "items"];
+    lines = [k for k in cart.keys() if k not in meta] if isinstance(cart, dict) else [];
+    if lines {
+        parts = [];
+        for k in lines {
+            try {
+                parts.append(f"{k} ${float(cart[k]):.2f}");
+            } except Exception {
+                parts.append(str(k));
+            }
+        }
+        return f"From {merchant}: " + "; ".join(parts) + f". Total ${amount:.2f}";
+    }
+
     return f"From {merchant}: 1x {category}, ${amount:.2f}";
 }
 
@@ -811,6 +862,34 @@ def _deterministic_sweep(cart: dict, mandate: str, agent_handle: str,
     if merchant and category {
         read_precedent(fingerprint_of(merchant, category, amount));
     }
+}
+
+
+"""Proposal when no model is configured at all.
+
+Distinct from _fallback_proposal, which describes a model that was supposed
+to answer and did not. Here nothing was ever expected to answer, so the
+wording must not imply a failure -- and it rules purely on evidence the
+deterministic sweep gathered from this payment.
+"""
+def _deterministic_proposal() -> Ruling {
+    n = len(adverse_sources());
+    if n >= 2 {
+        return Ruling(
+            blocked=True, uncertain=False, confidence=0.7, tokens=0,
+            reason="deterministic specialists converged independently"
+        );
+    }
+    if n == 1 {
+        return Ruling(
+            blocked=False, uncertain=True, confidence=0.35, tokens=0,
+            reason="a single specialist raised a concern; below quorum"
+        );
+    }
+    return Ruling(
+        blocked=False, uncertain=False, confidence=0.6, tokens=0,
+        reason="no specialist found adverse evidence"
+    );
 }
 
 
