@@ -220,6 +220,16 @@ node SettledGate(Gate) {
 # to root FIRST, then wire outward from the anchored node.
 # =============================================================
 
+# `root` is PERSISTENT across `jac run` invocations (.jac/data/<project>.db).
+# Without this, a second run starts with the treasury already drained and the
+# velocity window already full -- every payment blocks at Funds. Demo-safety:
+# call reset_turnstile() before seeding for a byte-identical re-run.
+def reset_turnstile() -> None {
+    for n in [root -->] {
+        del n;
+    }
+}
+
 def seed_turnstile() -> Treasury {
     existing = [root -->][?:Treasury];
     if existing {

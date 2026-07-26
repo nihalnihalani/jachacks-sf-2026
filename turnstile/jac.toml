@@ -1,3 +1,44 @@
 [project]
 name = "turnstile"
 version = "0.1.0"
+description = "Authorization firewall for AI agents that spend money"
+entry-point = "main.jac"
+kind = "web-app"
+
+[dependencies]
+[dependencies.npm]
+react = "^18.2.0"
+react-dom = "^18.2.0"
+
+[dependencies.npm.dev]
+vite = "^6.4.1"
+"@vitejs/plugin-react" = "4.7.0"
+typescript = "^5.3.3"
+"@types/react" = "^18.2.0"
+"@types/react-dom" = "^18.2.0"
+
+[serve]
+base_route_app = "app"
+
+[client]
+
+# --- byLLM ---------------------------------------------------------------
+# The key path is `[byllm.*]`, NOT `[plugins.byllm.*]`. Verified by execution:
+# under `[plugins.byllm.model]` the whole block is silently IGNORED and every
+# call falls through to litellm's OpenAI default ("Missing credentials"), so
+# Layer 1 could never work and the system prompt never applies.
+[byllm]
+system_prompt = """You are an authorization adjudicator for AI-agent payments.
+You reason from a signed human mandate and a proposed cart.
+Cite concrete evidence. Never approve on vibes; if evidence is thin, say uncertain."""
+
+[byllm.model]
+default_model = "gpt-4o-mini"
+
+[byllm.call_params]
+temperature = 0.1
+max_tokens = 1200
+
+[byllm.litellm]
+drop_params = true
+debug = false
