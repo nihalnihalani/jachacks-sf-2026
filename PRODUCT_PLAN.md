@@ -1,439 +1,707 @@
-# SpendOS Product Plan
+# SpendOS Product and Architecture Plan
 
-## Vision
+## Product thesis
 
-SpendOS is an always-on financial agent that watches spending, subscriptions,
-and financial waste so the user does not have to.
+SpendOS is a quiet financial agent that finds money problems, investigates
+them, asks only for decisions that matter, and remembers the answer.
 
-Its promise is simple:
+The long-term promise is:
 
-> Connect your financial activity once. SpendOS stays on top of the rest.
+> SpendOS stays on top of your spending, subscriptions, and agent purchases so
+> you do not have to.
 
-SpendOS is not another passive budgeting dashboard. It continuously evaluates
-financial activity, learns what is normal for the user, recommends useful
-actions, and acts automatically only when an explicit mandate allows it.
+The first product is intentionally narrower:
 
-## Objectives
+> Upload a real statement. SpendOS finds recurring charges, investigates the
+> most important ones, and gives you a trustworthy action inbox.
 
-1. Import real financial transactions from bank-statement CSVs.
-2. Detect recurring charges, subscriptions, price changes, waste, and anomalies.
-3. Maintain an automatically generated monthly budget.
-4. Give the user one reliable Safe to Spend number.
-5. Produce prioritized actions instead of passive charts.
-6. Learn from approvals, rejections, and corrections.
-7. Simulate external actions safely before connecting real financial services.
-8. Govern purchases requested by AI agents through explicit user mandates.
+This wedge is small enough to make reliable and valuable enough to earn the
+right to expand into budgeting, live account monitoring, and controlled
+purchasing.
 
-## Target users
+## What changed from the original plan
 
-The long-term audience is any adult who earns and spends money. The product must
-not require financial or technical expertise.
+The original plan was directionally strong but too broad. It combined
+subscription management, budgeting, anomaly detection, merchant communication,
+household purchasing, price monitoring, agent authorization, and bank
+connectivity before proving one complete behavior.
 
-The first version is optimized for someone who:
+The revised plan makes these corrections:
 
-- has checking or credit-card statements;
+1. **One vertical slice first.** Subscription Guardian is the initial product.
+2. **No false “always-on” claim.** CSV analysis is snapshot-based. Continuous
+   monitoring begins only when new data is synced or imported.
+3. **One source of truth.** The Jac graph is canonical. Do not add SQLite unless
+   measured limitations require it.
+4. **The graph is load-bearing.** Agent tools and walkers read the same graph
+   that the importer writes.
+5. **Walkers are used selectively.** Use functions for pure parsing and
+   calculation; use walkers for per-user persistence, traversal, and workflows.
+6. **Agentic means a closed loop.** Observe, investigate, propose, obtain
+   authority, verify, and learn.
+7. **Version-sensitive Jac behavior is gated by executable compatibility
+   tests.** Do not make a product invariant depend on an unverified language
+   feature.
+
+## Initial user and job
+
+The long-term audience is broad, but the first product is for an adult who:
+
+- has six to eighteen months of bank or card transactions;
 - pays for several recurring services;
-- wants to reduce waste but rarely audits transactions;
-- finds manual budgeting tedious; and
-- wants automation without surrendering control of consequential actions.
+- does not regularly audit those services;
+- wants clear savings actions rather than another finance dashboard; and
+- will grant automation only after SpendOS demonstrates good judgment.
 
-## Primary use cases
+Their job to be done is:
 
-### Continuous spending analysis
+> “Tell me what recurring charges deserve attention, explain why, and remember
+> what I decide.”
 
-SpendOS learns normal merchants, categories, amounts, and timing. It detects
-unusual charges, accelerating spending, duplicate payments, budget exhaustion,
-and transactions requiring review.
+## North-star experience
 
-### Subscription protection
-
-SpendOS detects monthly, quarterly, and annual recurring charges, price
-increases, duplicate or overlapping services, unexpected renewals, and newly
-appearing subscriptions.
-
-Subscription recommendations use these outcomes:
-
-- `KEEP`
-- `REVIEW`
-- `DOWNGRADE`
-- `CANCEL`
-- `NEGOTIATE`
-- `UNKNOWN`
-
-### Automatic budgeting
-
-SpendOS estimates income, fixed obligations, essential variable spending,
-subscriptions, discretionary spending, savings goals, and a protected buffer.
-
-The authoritative number is calculated deterministically:
+The user uploads a statement and sees:
 
 ```text
-Safe to Spend =
-Expected Income
-- Fixed Obligations
-- Upcoming Recurring Charges
-- Goal Contributions
-- Protected Buffer
-- Expected Essential Spending
-- Spending Already Committed
+SpendOS reviewed 1,842 transactions
+
+12 recurring charges found · $286/month
+3 need attention · up to $74/month recoverable
+
+[Review 3 actions]
 ```
 
-### Agent purchase protection
+The user should not be asked to configure categories, agents, graphs, or models
+before receiving value.
 
-SpendOS evaluates purchase requests against the user's budget and the requesting
-agent's mandate. It approves, blocks, or escalates requests while preserving an
-auditable authority chain.
+## First complete product loop
 
-Initial simulated purchasing scenarios are:
+```text
+Import
+-> normalize
+-> detect recurring charges
+-> create subscription cases
+-> investigate high-value cases
+-> propose actions
+-> user decides
+-> simulate the action
+-> verify the simulated result
+-> store precedent
+-> behave differently on the next run
+```
 
-1. Replenishing approved household essentials.
-2. Buying a specified item when price, deadline, and budget conditions are met.
-3. Authorizing carts submitted by another AI agent.
+This is the minimum acceptable meaning of “agentic” for SpendOS. A chat response
+or one-shot classification is insufficient.
 
-## Autonomy and approval model
+## Product scope
 
-SpendOS uses progressive autonomy. It may never expand its own authority.
+### Release 1: Subscription Guardian
 
-### Automatic
+Included:
 
-- Parse, normalize, and categorize transactions.
-- Detect recurring charges and price changes.
-- Calculate budgets and forecasts.
-- Identify anomalies and potential waste.
-- Draft recommendations and merchant communications.
-- Recalculate Safe to Spend.
-- Learn from explicit user corrections.
-- Simulate actions permitted by a mandate.
+- CSV import with a visible mapping preview.
+- Idempotent transaction ingestion.
+- Merchant normalization.
+- Monthly, quarterly, and annual recurrence detection.
+- Subscription price history and increase detection.
+- Ranked action inbox.
+- `KEEP`, `REVIEW`, `DOWNGRADE`, and `CANCEL` recommendations.
+- Evidence-backed explanations.
+- Approve, reject, postpone, protect, and correct actions.
+- Preference and precedent memory.
+- Simulated cancellation or downgrade.
+- Deterministic no-key operation.
 
-### Requires approval
+Not included:
 
-- Cancel or downgrade a subscription.
-- Send merchant communications.
-- Begin bill negotiation.
-- Purchase from an unfamiliar merchant.
-- Create a recurring payment.
-- Make an expensive or unusual purchase.
-- Change protected budget categories.
-- Change savings or debt goals.
-- Move real money.
+- Real bank connections.
+- Real cancellation.
+- Money movement.
+- Bill negotiation.
+- Autonomous shopping.
+- Credit, debt, investment, or net-worth products.
+- A full budgeting suite.
+- Claims of real-time monitoring.
 
-### Automatable under an explicit mandate
+### Release 2: Budget Guard
 
-- Approved household replenishment.
+Add only after Subscription Guardian is reliable:
+
+- Income and fixed-obligation confirmation.
+- Upcoming recurring-charge reserve.
+- Broad spending groups.
+- A deterministic Safe to Spend value.
+- Month-end risk forecast.
+- One weekly financial summary.
+
+Safe to Spend is not part of Release 1 because incorrect income or transfer
+classification can make it actively misleading.
+
+### Release 3: Connected Monitor
+
+- Authentication and per-user roots.
+- Read-only account synchronization.
+- Incremental transaction ingestion.
+- Scheduled monitoring.
+- Renewal, price-change, and unusual-charge notifications.
+- Explicit retention and deletion controls.
+
+Only this release may use “always on” literally.
+
+### Release 4: Controlled Action
+
+- Verified merchant action channels.
+- Real cancellation with explicit approval.
+- Execution state machine and failure recovery.
+- Post-action verification.
+- Revocable mandates for low-risk repeated actions.
+
+### Release 5: Agent Spending
+
+- Household replenishment mandates.
 - Planned price-triggered purchases.
-- Approved carts from another AI agent.
-- Low-risk merchant communication.
-- Rebalancing within discretionary budget categories.
+- Purchase requests from other AI agents.
+- Budget, merchant, purpose, recurrence, and authority checks.
 
-## User experience
+The current payment firewall becomes a capability of SpendOS at this stage,
+not the initial consumer surface.
 
-SpendOS presents one unified agent. Specialist tools remain internal.
+## Experience principles
 
-### Onboarding
+### One agent
 
-1. Upload one or more bank-statement CSVs.
-2. Preview the detected columns and transactions.
-3. Confirm only uncertain or consequential assumptions.
-4. Select financial priorities.
-5. Let SpendOS build the first budget and begin monitoring.
+The user sees SpendOS, not a committee of specialist agents. Internal tools can
+have distinct responsibilities, but the product owns one voice and one decision
+history.
 
-### Home
+### One primary surface
 
 The home screen contains:
 
-- Safe to Spend;
-- one concise financial status;
-- the most important recommended action;
-- recent SpendOS activity; and
-- a way to ask SpendOS a question.
+- recurring monthly total;
+- potential recoverable amount;
+- number of actions needing attention;
+- the highest-value action; and
+- recent SpendOS activity.
 
-### Agent inbox
+Detailed graphs, agent traces, and raw evidence are secondary inspection views.
 
-Ordinary recommendations are grouped into one approval queue. Users can approve,
-reject, postpone, or permanently suppress a recommendation.
+### One interruption policy
 
-### Notifications
+Interrupt immediately only for:
 
-Immediate notifications are reserved for unauthorized agent purchases, large
-unexpected charges, imminent expensive renewals, and serious budget risk.
-Everything else is grouped into a daily or weekly summary.
+- an unfamiliar new recurring charge;
+- a large unexpected price increase;
+- a connected agent purchase outside its mandate; or
+- a time-sensitive high-cost renewal.
 
-## Functional requirements
+Group ordinary findings into one digest or action inbox.
 
-### CSV ingestion
+### Progressive disclosure
 
-- Detect common date, description, debit, credit, and amount columns.
-- Support common date and amount conventions.
-- Preview mappings before import.
-- Report malformed rows instead of silently discarding them.
-- Prevent duplicate imports.
-- Record the source of each transaction.
+Each action shows:
 
-### Financial intelligence
+1. a one-sentence recommendation;
+2. expected impact;
+3. confidence and approval requirement; and
+4. expandable evidence.
 
-- Normalize merchant identities.
-- Distinguish income, transfers, refunds, payments, and spending.
-- Detect recurring cadence and expected next charge.
-- Track merchant and subscription price history.
-- Calculate category and merchant baselines.
-- Attach confidence to inferred facts.
-- Separate observations from agent interpretations.
+### Honest states
 
-### Recommendations
-
-Every recommendation includes:
-
-- proposed action;
-- monthly and annual impact;
-- supporting evidence;
-- confidence;
-- reversibility;
-- approval level; and
-- whether each claim is observed, inferred, or externally verified.
-
-### Preference memory
-
-SpendOS remembers protected merchants, category corrections, rejected
-recommendations, approved substitutions, notification preferences, financial
-priorities, and agent mandates. Users can inspect and delete learned preferences.
-
-### Simulated actions
-
-The first version produces exact execution previews and audit records without
-external side effects. Simulated actions must never appear completed in the real
-world.
-
-## Non-functional requirements
-
-### Simplicity
-
-- The home screen must be understandable within five seconds.
-- Onboarding must avoid a long questionnaire.
-- Advanced evidence is collapsed by default.
-- Routine events should not create frequent notifications.
-
-### Reliability
-
-- Financial arithmetic must be deterministic.
-- The application must remain useful without an LLM key.
-- Identical inputs must produce identical transaction and budget calculations.
-- Failed analysis must be visible.
-- Cached demo data must never masquerade as live output.
-
-### Privacy and security
-
-- Minimize retention of raw financial files.
-- Delete temporary uploads.
-- Avoid exposing full financial details in logs.
-- Minimize and disclose financial data sent to models.
-- Add authentication, encryption, and tenant isolation before real accounts.
-- Require explicit mandates and auditable approval for every external action.
-
-### Explainability
-
-Every recommendation must explain what happened, why it matters, what SpendOS
-proposes, what evidence supports it, and what approval would do.
-
-## Technical architecture
-
-### Core stack
-
-- **Jac:** graph schema, walkers, persistence, public endpoints, and agent orchestration.
-- **Python:** CSV parsing, recurrence detection, statistical baselines, and budget arithmetic.
-- **byLLM:** interpretation, prioritization, explanations, and constrained tool selection.
-- **Typed Jac objects:** strict contracts for recommendations and agent results.
-- **SQLite if needed:** local structured persistence alongside the Jac graph.
-- **Plaid later:** read-only transaction synchronization.
-- **Merchant integrations later:** verified cancellation and purchasing actions.
-
-### Core graph
+Use explicit states:
 
 ```text
-User -> Account -> Statement -> Transaction -> Merchant
-                                      |
-                                      +-> Subscription
-
-User -> Budget -> BudgetCategory
-User -> FinancialGoal
-User -> Preference
-User -> Mandate -> AgentIdentity
-
-Recommendation -> Evidence
-Recommendation -> ActionRequest
-Decision -> Precedent
+DETECTED
+INVESTIGATING
+PROPOSED
+AWAITING_APPROVAL
+APPROVED
+REJECTED
+SIMULATED
+EXECUTING
+SUCCEEDED
+FAILED
+VERIFIED
 ```
 
-### Core walkers and components
+The first release stops at `SIMULATED`. It must never render a simulation as a
+completed external action.
 
-- `ImportStatement`: validate and import transactions.
-- `DetectSubscriptions`: find recurring charges and price changes.
-- `BuildBudget`: calculate categories, reserves, and Safe to Spend.
-- `MonitorFinances`: compare current behavior against historical baselines.
-- `ReviewRecommendation`: investigate findings with typed tools.
-- `AuthorizeAction`: enforce mandates and approval requirements.
-- `RememberDecision`: turn explicit user decisions into inspectable precedent.
-- `SimulateAction`: preview an external action without executing it.
+## Decision policy
 
-## Delivery phases
+### Deterministic responsibilities
 
-### Phase 1 — Functional financial core
+- CSV validation and row normalization.
+- Transaction identity and deduplication.
+- Recurrence and cadence calculations.
+- Price history.
+- Monthly and annual totals.
+- Savings arithmetic.
+- Confidence thresholds.
+- Approval requirements.
+- Action-state transitions.
+- Mandate enforcement.
 
-- Reliable CSV import.
-- Transaction graph.
-- Merchant normalization.
-- Subscription and price-change detection.
-- Automatic first budget.
-- Safe to Spend.
-- Deterministic tests.
+### LLM responsibilities
 
-### Phase 2 — Unified SpendOS agent
+- Explain ambiguous merchant descriptions.
+- Compare likely service overlap.
+- Prioritize cases based on structured evidence.
+- Propose an action and concise rationale.
+- Select investigation tools when a case is ambiguous.
+- Draft optional merchant communication.
 
-- Typed analysis tools.
-- Prioritized recommendations.
-- Evidence records.
-- Financial tribunal.
-- Preference and precedent memory.
-- Graceful no-key behavior.
+### Prohibited LLM authority
 
-### Phase 3 — Simple user experience
+The LLM may not:
 
-- Import onboarding.
-- Home.
-- Agent inbox.
-- Subscriptions.
-- Minimal budget detail.
-- Conversation.
-- Mandate settings.
+- calculate authoritative financial totals;
+- invent usage evidence;
+- assert current prices or cancellation channels without verification;
+- execute an action;
+- widen a mandate;
+- bypass a required approval; or
+- convert malformed output into a default approval.
 
-### Phase 4 — Safe action simulation
+Invalid or unsupported model output becomes `REVIEW`.
 
-- Cancellation and downgrade previews.
-- Household replenishment mandates.
-- Planned price-triggered purchases.
-- External-agent purchase authorization.
-- Approval and audit lifecycle.
+## Jac-native architecture
 
-### Phase 5 — Continuous operation
+### Language workflow
 
-- New-statement monitoring.
-- Scheduled analysis.
-- Daily or weekly summaries.
-- Renewal, price-change, anomaly, and budget-risk alerts.
+Jac implementation work begins with the installed compiler, not remembered
+syntax:
 
-### Phase 6 — Real connectivity
+```bash
+jac --version
+jac guide --search <topic>
+jac check .
+jac check --lint .
+jac fmt
+jac test
+jac build
+```
 
-- Authentication and tenant isolation.
-- Read-only bank connectivity.
-- Incremental transaction synchronization.
-- Encryption and secrets management.
-- Real notifications.
+Use `jac precommit` as the combined format/check gate. Use `jac mcp` when an AI
+coding assistant needs live documentation and compiler validation. Refresh
+project-local exported skills with `jac guide --export .claude/skills` whenever
+the pinned Jac version changes.
 
-### Phase 7 — Controlled execution
+Check the current release notes before changing syntax, configuration,
+persistence, codespaces, or byLLM behavior.
 
-Add one capability at a time: merchant communication, subscription
-cancellation, household replenishment, price-triggered purchasing, and
-agent-to-agent purchase authorization.
+## Architecture rule
 
-## Risks and trade-offs
+Use Jac where topology, persistence, per-user state, and mobile computation
+matter. Do not translate every function into a walker merely to increase the
+Jac feature count.
 
-### CSV input is not genuinely real-time
+### Functions
 
-The first version monitors imported financial state. It must not claim real-time
-protection until live account synchronization exists.
+Use ordinary typed functions for:
 
-### Waste is subjective
+- CSV dialect and column detection;
+- row parsing;
+- merchant string normalization;
+- date and amount conversion;
+- recurrence statistics;
+- deterministic totals; and
+- typed validation.
 
-Payment history cannot prove non-use. Uncertain cases must be recommendations,
-not automatic cancellations.
+These operations do not become more expressive by traversing a graph.
 
-### Models can hallucinate
+### Walkers
 
-Financial totals are recalculated deterministically. External prices,
-cancellation channels, and merchant facts must be verified or labeled
-unverified. Invalid model output defaults to `REVIEW`.
+Use walkers for:
 
-### Simplicity can hide important reasoning
+- committing an approved import into a user's graph;
+- traversing transactions into merchant and subscription histories;
+- creating and updating cases;
+- investigating a subscription across evidence, preferences, and precedents;
+- processing an approval workflow;
+- applying a decision to future cases; and
+- authorizing another agent's purchase.
 
-Show one short explanation by default and make structured evidence expandable.
+### Public versus private entry points
 
-### Autonomy can undermine trust
+- Use a simple public function for an unauthenticated CSV mapping preview.
+- Use private walkers for user data and persistent workflows once authentication
+  is enabled.
+- Never place financial records under a shared public root.
+- In the prototype, explicitly label the graph single-user and do not imply
+  tenant isolation.
 
-Batch ordinary approvals, interrupt only for urgent events, and require an
-explicit revocable mandate for every automatic external action.
+### Full-stack boundary
 
-## Testing and validation
+Keep frontend and backend in Jac. The client should spawn typed server walkers
+or call public functions directly rather than introducing Express and manual
+JSON endpoints.
 
-### Unit tests
+Client calls must handle:
+
+- loading;
+- success;
+- empty results;
+- typed validation failure;
+- server failure; and
+- retry without duplicating graph data.
+
+### byLLM contract
+
+Use typed objects and `sem` annotations for delegated judgment. The model
+returns a small result:
+
+```text
+SubscriptionAssessment
+  verdict
+  reason
+  evidence_ids
+  confidence
+  proposed_action
+```
+
+The result references evidence already present in the graph. Free-form prose is
+not accepted as evidence.
+
+Use one agentic call for ambiguous cases:
+
+```text
+assess_subscription(
+    case_id,
+    tools=[
+        read_charge_history,
+        read_price_change,
+        read_user_preference,
+        read_precedent,
+        compare_portfolio_overlap
+    ]
+)
+```
+
+Jac code validates cited evidence, recomputes impact, and enforces the approval
+policy after the call.
+
+### Graph model
+
+Core nodes:
+
+```text
+UserRoot
+Account
+Statement
+Transaction
+Merchant
+Subscription
+SubscriptionCase
+Evidence
+Recommendation
+Decision
+Preference
+Precedent
+ActionRequest
+ActionAttempt
+Mandate
+AgentIdentity
+```
+
+Meaningful typed edges:
+
+```text
+UserRoot -Owns-> Account
+Account -ImportedFrom-> Statement
+Statement -Contains-> Transaction
+Transaction -PaidTo-> Merchant
+Transaction -InstanceOf-> Subscription
+SubscriptionCase -About-> Subscription
+SubscriptionCase -SupportedBy-> Evidence
+Recommendation -Proposes-> ActionRequest
+Decision -Resolves-> SubscriptionCase
+Decision -Creates-> Precedent
+Mandate -DelegatesTo-> AgentIdentity
+```
+
+Edges should carry relationship data when it belongs to the relationship:
+
+- `Contains.row_number`
+- `InstanceOf.match_confidence`
+- `SupportedBy.weight`
+- `DelegatesTo.scope`
+- `DelegatesTo.expires_at`
+
+### Load-bearing graph traversal
+
+`InvestigateSubscription` must traverse:
+
+```text
+SubscriptionCase
+-> Subscription
+-> Transactions
+-> Merchant
+-> Preferences
+-> Prior Decisions
+-> Evidence
+```
+
+Deleting the graph must change the result. If analysis can run identically from
+an isolated dictionary, the graph is decorative and the design should be
+revisited.
+
+### Edge-ability compatibility gate
+
+The original project depends on an edge ability for funding metering. Treat this
+as version-sensitive behavior rather than a permanent language guarantee.
+
+Before retaining that dependency:
+
+1. Pin the Jac version.
+2. Add a five-line executable compatibility test proving the edge ability fires.
+3. Run it in CI.
+4. Provide a node/walker fallback for the budget check.
+
+Product correctness must not depend on behavior that the pinned runtime and CI
+do not prove.
+
+### Persistence and idempotency
+
+Jac graph state persists between runs, so every mutating walker needs an
+idempotency key.
+
+Recommended identities:
+
+- statement: hash of normalized file content plus account;
+- transaction: account, posted date, normalized description, amount, and source
+  row discriminator;
+- subscription case: subscription plus analysis version plus observation window;
+- action attempt: action request plus execution nonce.
+
+Repeated import or retry must not create duplicate transactions, cases, or
+actions.
+
+### Concurrency
+
+Do not use module-global mutable evidence for user workflows. Evidence belongs
+to a case or walker instance. Global evidence can leak across simultaneous
+requests and makes tests order-dependent.
+
+### Canonical storage
+
+Use the Jac graph as the canonical application state. A relational index may be
+added later only after a benchmark demonstrates a query or reporting need.
+Avoid dual writes during the prototype.
+
+## Data contracts
+
+### Transaction
+
+Required:
+
+- stable id;
+- account id;
+- posted date;
+- raw description;
+- normalized merchant;
+- signed amount;
+- currency;
+- source statement;
+- import row;
+- classification;
+- classification confidence.
+
+### Subscription
+
+- merchant;
+- cadence;
+- median amount;
+- amount variation;
+- first and last observed charge;
+- next expected charge;
+- detection confidence;
+- price history;
+- protected status.
+
+### Evidence
+
+- id;
+- source type;
+- observed fact;
+- observation window;
+- confidence;
+- adverse or supporting;
+- data provenance;
+- created by deterministic code or model.
+
+### Recommendation
+
+- verdict;
+- case id;
+- cited evidence ids;
+- reason;
+- deterministic monthly impact;
+- deterministic annual impact;
+- confidence;
+- required approval;
+- model and prompt-contract version.
+
+## Import strategy
+
+Do not promise universal CSV detection initially.
+
+Release 1 supports:
+
+```text
+date, description, amount
+```
+
+and one explicit mapping screen for alternatives. Use adapter tests to add bank
+formats incrementally.
+
+The importer must:
+
+- preview before committing;
+- show rejected rows and reasons;
+- handle debit sign conventions;
+- require a currency;
+- capture timezone/statement period where available;
+- detect duplicate files and rows; and
+- make retry safe.
+
+## Recommendation ranking
+
+Rank action inbox items deterministically:
+
+```text
+priority =
+financial_impact
+* confidence
+* urgency
+* reversibility_weight
+```
+
+Apply product rules:
+
+- unknown new recurrence outranks portfolio optimization;
+- imminent renewal outranks a distant renewal;
+- high-impact price increase outranks small overlap;
+- low-confidence advice cannot become `CANCEL`;
+- protected subscriptions cannot receive cancel recommendations.
+
+## Success metrics
+
+### First-session value
+
+- Import completion rate.
+- Time from upload to first useful finding.
+- Percentage of imported rows accepted.
+- Subscription detection precision on labeled fixtures.
+- Number of actionable cases, not total alerts.
+
+### Trust
+
+- Unsupported-claim rate.
+- User correction rate.
+- Recommendation rejection rate.
+- Duplicate-alert rate.
+- Actions shown with valid evidence.
+
+### Agent quality
+
+- Valid typed-output rate.
+- Evidence citation validity.
+- Correct escalation to `REVIEW`.
+- Deterministic outcome stability with the LLM disabled.
+- Reduction in repeated model calls after precedent is learned.
+
+Do not use “amount potentially saved” as the sole success metric. Inflated
+cancel recommendations can optimize that number while destroying trust.
+
+## Testing strategy
+
+### Jac compatibility tests
+
+- The native Jac binary version is pinned and recorded.
+- `jac guide` is refreshed for that version.
+- Project compiles.
+- Client/server imports compile.
+- Private/public visibility behaves as expected.
+- Graph persists between runs.
+- Edge ability behavior is proven or the fallback is used.
+- `jac precommit`, `jac test`, and `jac build` pass.
+
+### Deterministic unit tests
 
 - CSV mapping and parsing.
+- Amount sign and currency.
+- Duplicate import.
 - Merchant normalization.
-- Duplicate imports.
-- Recurrence and cadence.
-- Price changes, refunds, and reversals.
-- Income detection.
-- Budget and Safe to Spend arithmetic.
-- Mandate limits.
-- Recommendation validation.
+- Monthly, quarterly, and annual cadence.
+- Price changes.
+- Refunds and reversals.
+- Savings arithmetic.
+- Ranking.
+- State transitions.
 
-### Scenario tests
+### Graph traversal tests
 
-- Duplicate subscriptions.
-- Annual renewal approaching.
-- Protected subscription.
-- Unusual but legitimate large payment.
-- Unfamiliar recurring charge.
-- Month-end overspending.
-- Household replenishment.
-- Price-triggered purchase.
-- Unauthorized agent cart.
+- Correct nodes and typed edges are created.
+- Investigation reaches only the current user's graph.
+- Case evidence is traversed rather than passed as a detached blob.
+- A learned precedent changes the next walk.
+- Repeated imports do not change counts.
 
-### End-to-end test
+### Agent contract tests
+
+- Malformed output becomes `REVIEW`.
+- Cited evidence exists and belongs to the case.
+- Unsupported claims are rejected.
+- Deterministic arithmetic overrides model arithmetic.
+- Protected subscriptions cannot be canceled.
+- No-key mode remains useful.
+
+### Full story
 
 ```text
-CSV upload
--> graph creation
--> subscription detection
--> budget calculation
--> recommendation
--> user approval
--> simulated action
--> precedent memory
--> changed behavior on the next run
+clean graph
+-> import statement
+-> detect subscriptions
+-> create case
+-> investigate
+-> approve simulated action
+-> store precedent
+-> re-import safely
+-> rerun
+-> observe changed recommendation with no duplicate data
 ```
 
-### Security tests before live integrations
+Run this story at least three consecutive times because persistence defects often
+appear only after the first run.
 
-- Cross-user isolation.
-- Malicious file uploads.
-- Prompt injection through transaction descriptions.
-- Unauthorized walker invocation.
-- Mandate escalation.
-- Replay attacks.
-- Secret and log leakage.
+## Acceptance criteria for Release 1
 
-## Acceptance criteria for the first usable version
-
-- A user can upload a real bank-statement CSV.
-- Invalid or skipped rows are clearly reported.
-- Transactions persist as graph records.
-- Recurring charges have cadence and confidence.
-- Subscription totals are calculated deterministically.
-- SpendOS creates an initial budget and Safe to Spend value.
-- At least three useful recommendations are generated from the sample data.
-- Every recommendation separates facts from inferences.
-- Users can approve, reject, postpone, or suppress recommendations.
-- Approved actions are simulated and clearly labeled.
-- Decisions affect later recommendations.
-- The core remains useful without an LLM key.
+- Clean checkout setup is documented and reproducible.
+- The pinned Jac version compiles and starts the application.
+- A real three-column CSV can be previewed and imported.
+- Invalid rows are visible with specific reasons.
+- Reimporting the same file creates zero duplicates.
+- Transactions, merchants, and subscriptions form a traversable typed graph.
+- Monthly, quarterly, and annual fixtures are detected deterministically.
+- Subscription totals and price changes are correct.
+- At least one ambiguous case invokes the typed SpendOS agent.
+- Every model-backed recommendation cites valid graph evidence.
+- Invalid model output safely becomes `REVIEW`.
+- Users can approve, reject, postpone, protect, and correct a recommendation.
+- An approved action is clearly simulated and recorded.
+- A decision creates precedent that changes the next analysis.
+- The application remains useful without an API key.
 - No cached result is presented as live analysis.
-- The primary workflow has a passing automated end-to-end test.
+- The complete story passes three consecutive runs.
 
-## Assumptions
+## Explicitly unresolved
 
-- SpendOS is a responsive web application initially.
-- One unified SpendOS agent is visible; specialist tools remain internal.
-- Balanced budget optimization is the default.
-- CSV data is real; external actions are simulated initially.
-- Real purchases and cancellations come after read-only account connectivity.
-- Jac walkers, mandates, the tribunal, and precedent memory remain foundational.
-- Functionality, trust, and simplicity take priority over visual spectacle.
+- Exact pinned Jac version after compatibility verification.
+- Authentication approach for the connected release.
+- Bank-data provider and supported countries.
+- Verified cancellation providers.
+- Model/provider selection and data-retention terms.
+- How subscription overlap will be externally verified.
+
+These decisions do not block Release 1.

@@ -1,5 +1,11 @@
 # SpendOS
 
+> **Historical design document.** This records the original JacHacks payment
+> firewall architecture and the compiler behavior observed during that build.
+> It is not current Jac language authority. Use `PRODUCT_PLAN.md`,
+> `SIMPLE_PLAN.md`, `CLAUDE.md`, and the installed compiler's `jac guide`
+> before implementing new work.
+
 **An authorization firewall for AI agents that spend money.**
 Every payment is a walker. Authorization is a route it must survive.
 
@@ -66,7 +72,9 @@ A **red-team Probe agent** reads each rejection reason and rewrites its attack t
 
 ## 4. New Jac features we exploit
 
-All verified against the local `jac/` source at 0.34.5 and a compile spike.
+The observations below were verified against a historical local 0.34.5 compiler
+snapshot. Reverify every version-sensitive behavior against the pinned native
+binary before relying on it.
 
 | # | Feature | Why it matters here | Verified |
 |---|---|---|---|

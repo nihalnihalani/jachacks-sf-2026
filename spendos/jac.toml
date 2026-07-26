@@ -1,7 +1,7 @@
 [project]
 name = "spendos"
 version = "0.1.0"
-description = "Authorization firewall for AI agents that spend money"
+description = "Agentic subscription guardian and financial safety system"
 entry-point = "main.jac"
 kind = "web-app"
 
@@ -21,6 +21,9 @@ typescript = "^5.3.3"
 base_route_app = "app"
 
 [client]
+
+[test]
+directory = "tests"
 
 # --- byLLM ---------------------------------------------------------------
 # The key path is `[byllm.*]`, NOT `[plugins.byllm.*]`. Verified by execution:

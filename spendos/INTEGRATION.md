@@ -1,7 +1,12 @@
 # SpendOS — Integration Contract, Runbook & Risk Register
 
+> **Archived hackathon runbook.** The facts below describe the historical
+> 0.34.5 development environment and may no longer match current Jac. They do
+> not override `CLAUDE.md`, `AGENTS.md`, `PRODUCT_PLAN.md`, `SIMPLE_PLAN.md`,
+> `jac guide`, or the latest official reference and release notes.
+
 Owner: IntegrationLead. **This file is the tie-breaker.** If your module disagrees with this
-document, this document wins — or you change this document first and tell the team.
+document, follow the current project guidance above instead.
 
 Everything below marked **[V]** was verified by execution against jac 0.34.5 on this machine.
 Everything marked **[U]** is unverified and flagged as such.

@@ -1,147 +1,253 @@
-# SpendOS Simple Implementation Plan
+# SpendOS Simple Build Plan
 
-## Rule
+## Product to build now
 
-Build the smallest useful version, keep it working, and add one capability at a
-time. Every iteration must end with a runnable product and a passing smoke test.
+Build one working feature:
 
-Do not start with real bank connections, real cancellations, real purchases, a
-large dashboard, or several visible agents.
+> Upload a statement, find subscriptions, investigate the important ones, and
+> remember what the user decides.
 
-## Version 0 — Preserve the working foundation
+Do not build a complete financial operating system yet. The financial OS is the
+direction; Subscription Guardian is the first product.
 
-Goal: keep the renamed SpendOS project green.
+## Engineering rules
 
-- Verify the existing payment walker and gate chain.
-- Fix paths, imports, environment variable names, and smoke scripts after the rename.
-- Keep the no-API-key mode working.
-- Remove any fallback that makes cached data look live.
-- Update the main screen and copy to describe SpendOS honestly.
+1. Keep `main` runnable after every change.
+2. Finish one live vertical slice before adding another.
+3. Deterministic code owns facts and money calculations.
+4. The LLM may investigate and explain, but not authorize itself.
+5. The Jac graph is the only source of truth.
+6. Use functions for parsing and math; use walkers for traversal and workflow.
+7. Every mutation is idempotent.
+8. Every iteration works without an API key.
+9. Never show cached or simulated data as live.
+10. Pin and test the Jac behavior the product depends on.
 
-**Done when:** the existing demo starts and its smoke tests pass from a clean checkout.
+## Iteration 0 — Green SpendOS
 
-## Version 1 — Upload and understand a statement
+Purpose: prove the renamed foundation still works on the current remote code.
 
-Goal: turn a real CSV into trustworthy financial data.
+- Install and pin the native Jac binary.
+- Read the version-matched `jac guide` topics used by the project.
+- Export project-local agent skills.
+- Verify the project `jac mcp` configuration with `jac mcp --inspect`.
+- Run `jac check` and `jac check --lint`.
+- Run `jac fmt` and make `jac precommit` the standard quality gate.
+- Run the current smoke and tribunal tests.
+- Migrate executable tests into `spendos/tests/` and run them with `jac test`.
+- Run `jac build` so the whole project and client boundary are checked.
+- Run them three times to expose persistence defects.
+- Add a tiny compatibility test for edge abilities.
+- If edge abilities do not fire on the pinned runtime, move funding checks into
+  a walker/node ability.
+- Remove stale fallback paths that can impersonate live output.
 
-- Add one CSV upload flow.
-- Initially support `date`, `description`, and `amount`.
-- Show a preview before import.
-- Normalize merchant names.
-- Store transactions in the Jac graph.
-- Report malformed and duplicate rows.
-- Show total income, total spending, and transaction count.
+Done when:
 
-**Done when:** a user can upload the sample statement and see correct totals from live data.
+- setup works from a clean checkout;
+- no external Python installation is required for Jac;
+- the app compiles and starts;
+- no-key and live-key paths are explicit;
+- `jac precommit`, `jac test`, and `jac build` pass;
+- all smoke tests pass three consecutive times; and
+- version-sensitive behavior is covered by CI.
 
-## Version 2 — Find subscriptions
+## Iteration 1 — Import one CSV correctly
 
-Goal: deliver the first unmistakably useful feature.
+Purpose: establish trustworthy live data.
 
-- Port the deterministic recurring-charge detector from killBill.
-- Detect monthly, quarterly, and annual cadence.
-- Show merchant, amount, frequency, next expected charge, and confidence.
-- Calculate total monthly and annual subscription cost.
-- Detect simple price increases.
-- Add focused tests for recurrence and merchant normalization.
-
-**Done when:** SpendOS reliably finds the subscriptions in the sample statement without an LLM.
-
-## Version 3 — Add one real agent loop
-
-Goal: make SpendOS agentic without making it complicated.
-
-- Give one unified SpendOS agent typed tools:
-  - inspect subscriptions;
-  - inspect spending totals;
-  - inspect price changes;
-  - read saved preferences;
-  - propose an action.
-- Produce `KEEP`, `REVIEW`, `DOWNGRADE`, or `CANCEL`.
-- Show one short reason and expandable evidence.
-- Validate every agent result.
-- Recalculate all savings deterministically.
-- Fall back to useful deterministic results if the model is unavailable.
-
-**Done when:** SpendOS investigates live findings and produces supported recommendations.
-
-## Version 4 — Learn from the user
-
-Goal: make the second run better than the first.
-
-- Let users approve, reject, postpone, or suppress a recommendation.
-- Store explicit preferences and precedents.
-- Never suggest canceling a protected subscription.
-- Show why a prior decision changed the current recommendation.
-- Add a simple action inbox.
-
-**Done when:** a user decision persists and changes a later analysis.
-
-## Version 5 — Add a minimal budget
-
-Goal: answer one question: “What can I safely spend?”
-
-- Estimate income and fixed recurring obligations.
-- Reserve upcoming subscription costs.
-- Create broad categories only: essentials, bills, subscriptions, discretionary, and goals.
-- Calculate one deterministic Safe to Spend value.
-- Ask for confirmation when income or fixed obligations are uncertain.
-- Keep detailed budget configuration out of the main experience.
-
-**Done when:** Safe to Spend is mathematically explainable from imported transactions.
-
-## Version 6 — Simulate one action
-
-Goal: prove that SpendOS can move from advice to controlled action.
-
-- Start with subscription cancellation simulation.
-- Require explicit approval.
-- Show the exact proposed action, expected savings, and evidence.
-- Mark the result `SIMULATED`; never imply that a real cancellation occurred.
-- Save the action and approval in the audit history.
-
-**Done when:** the complete live flow works:
+Support exactly:
 
 ```text
-upload
--> detect subscription
--> recommend action
+date,description,amount
+```
+
+Build:
+
+- a pure typed parser;
+- an import preview;
+- rejected-row reporting;
+- signed-amount and currency handling;
+- statement and transaction fingerprints;
+- an idempotent import walker; and
+- `Statement -> Transaction -> Merchant` graph traversal.
+
+Do not add arbitrary bank-format detection yet. Add a manual mapping screen
+later.
+
+Done when:
+
+- the sample imports from the UI;
+- totals match an independently calculated fixture;
+- malformed rows show reasons;
+- reimport creates zero duplicates; and
+- the UI reads totals back from the graph.
+
+## Iteration 2 — Detect subscriptions without an LLM
+
+Purpose: deliver the first useful result.
+
+Build:
+
+- deterministic merchant normalization;
+- monthly, quarterly, and annual recurrence detection;
+- amount-variation tolerance;
+- next expected charge;
+- detection confidence;
+- price history and increase detection; and
+- `Transaction -> Subscription` relationships with match confidence.
+
+Show only:
+
+- recurring monthly total;
+- subscriptions found;
+- next expected charge; and
+- price changes.
+
+Done when:
+
+- labeled fixtures pass;
+- repeat runs are identical;
+- subscriptions are traversed from the user's graph; and
+- no LLM is needed.
+
+## Iteration 3 — Add one genuine agent investigation
+
+Purpose: make SpendOS agentic in a testable way.
+
+Create one `SubscriptionCase` for a high-value or ambiguous subscription.
+
+Give one typed `assess_subscription` call these tools:
+
+- read charge history;
+- read price changes;
+- read user preferences;
+- read prior precedent;
+- compare portfolio overlap.
+
+Require the result to cite evidence ids. Jac validates the citations,
+recalculates savings, and enforces the approval rule.
+
+Outcomes:
+
+- `KEEP`
+- `REVIEW`
+- `DOWNGRADE`
+- `CANCEL`
+
+Rules:
+
+- low confidence cannot produce `CANCEL`;
+- unsupported claims become `REVIEW`;
+- protected subscriptions cannot be canceled;
+- no-key mode produces deterministic findings, not fake agent output.
+
+Done when:
+
+- one live case is investigated;
+- the result cites valid graph evidence;
+- malformed model output is safe; and
+- the same financial facts produce the same monetary impact.
+
+## Iteration 4 — Close the learning loop
+
+Purpose: prove the agent improves through use.
+
+Add actions:
+
+- approve;
+- reject;
+- postpone;
+- protect;
+- correct merchant.
+
+Persist `Decision`, `Preference`, and `Precedent` nodes. The next investigation
+must traverse them.
+
+Done when:
+
+- “never cancel this” prevents later cancel recommendations;
+- a corrected merchant is reused;
+- repeated analysis avoids unnecessary model work; and
+- the behavior change is visible and explainable.
+
+## Iteration 5 — Simulate one cancellation
+
+Purpose: move from advice to controlled action.
+
+Implement:
+
+```text
+PROPOSED
+-> AWAITING_APPROVAL
+-> APPROVED
+-> SIMULATED
+```
+
+Show:
+
+- exact proposed action;
+- evidence;
+- expected deterministic savings;
+- approval timestamp; and
+- a clear “No external action was performed” label.
+
+Done when the full live story passes:
+
+```text
+clean graph
+-> upload
+-> detect
+-> investigate
 -> approve
 -> simulate
 -> remember
+-> rerun without duplicates
 ```
 
-## Only after Version 6
+Run it three consecutive times.
 
-Add continuous account synchronization, real notifications, merchant
-integrations, autonomous household replenishment, price-triggered purchasing,
-and authorization for other AI agents.
+## Stop line
 
-These features should be implemented separately. Do not begin the next one until
-the previous capability is reliable, tested, and understandable to a normal user.
+Do not begin budgeting, Plaid, notifications, real cancellation, shopping,
+multiple visible agents, or a large dashboard before Iteration 5 is reliable.
 
-## Immediate work order
+## Next capability after the stop line
 
-1. Run and repair the renamed SpendOS smoke test.
-2. Define the smallest transaction and subscription graph nodes.
-3. Add the three-column CSV importer.
-4. Port recurrence detection.
-5. Display live subscription totals.
-6. Add one SpendOS recommendation tool loop.
-7. Persist one user preference.
-8. Calculate Safe to Spend.
-9. Simulate one approved cancellation.
-10. Test the complete workflow from a clean checkout.
+Add a minimal Budget Guard:
 
-## First milestone acceptance criteria
+- confirm income;
+- reserve fixed and recurring obligations;
+- calculate one deterministic Safe to Spend value; and
+- warn when a new subscription makes the plan unsafe.
 
-- Clean setup instructions work.
-- Existing SpendOS smoke tests pass.
-- A real CSV can be imported.
-- Totals are correct and malformed rows are visible.
+Only after that should SpendOS add connected monitoring and real actions.
+
+## Immediate execution order
+
+1. Install and pin the Jac version.
+2. Restore green compile and smoke tests.
+3. Add the edge-ability compatibility test.
+4. Define `Statement`, `Transaction`, `Merchant`, and typed edges.
+5. Implement the three-column parser and import preview.
+6. Implement idempotent graph commit.
+7. Port and test recurrence detection.
+8. Render live subscription totals.
+9. Add one evidence-backed agent case.
+10. Persist one user decision and prove the next run changes.
+11. Simulate one approved cancellation.
+12. Run the full story three times from a clean checkout.
+
+## First release acceptance criteria
+
+- Clean checkout setup works.
+- Pinned Jac behavior is verified in CI.
+- One real CSV imports safely and idempotently.
+- Invalid rows are visible.
 - Subscriptions are detected deterministically.
-- The interface uses live results only.
-- The application works without an API key.
-- With an API key, one agent produces validated recommendations.
-- A user decision persists between runs.
-- One cancellation can be approved and simulated.
+- The graph is traversed during investigation.
+- One agent produces a typed, evidence-backed recommendation.
+- No-key mode remains honest and useful.
+- A user decision changes the next result.
+- One approved cancellation is simulated and clearly labeled.
+- The complete workflow passes three consecutive runs.

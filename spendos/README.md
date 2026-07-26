@@ -6,7 +6,7 @@
 <p align="center">
   <strong>Track:</strong> Agentic AI ·
   <strong>Built at:</strong> JacHacks SF 2026 ·
-  <strong>Stack:</strong> Jac 0.34.6 + byLLM
+  <strong>Stack:</strong> Jac native binary + built-in byLLM
 </p>
 
 ---
@@ -42,7 +42,12 @@ Seven halt locations, all asserted in `smoke.jac`:
 ## Quick start
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/jaseci-labs/jaseci/main/scripts/install.sh | bash
 cd spendos
+jac install --plan
+jac install
+jac precommit
+jac test
 ./demo.sh              # clean slate, assert 9/9, start the UI
 ./demo.sh --check      # verify only — run this before you present
 ```
@@ -50,8 +55,16 @@ cd spendos
 Manually:
 ```bash
 jac run smoke.jac      # 9 payments, 0 tokens, no API key required
-jac start -d           # UI + API.  The -d is REQUIRED — bare `jac start`
-                       # runs no client build and serves the API only.
+jac start --dev        # UI + API with hot reload
+```
+
+Before changing Jac code, use the version-matched reference bundled with the
+compiler:
+
+```bash
+jac guide --search walker
+jac guide jac-by-llm
+jac mcp --inspect
 ```
 
 Optional — set **one** key in `.env` to enable the LLM intent gate:

@@ -1,15 +1,18 @@
 # SpendOS
 
-**An authorization firewall and financial operating system for AI agents that spend money.**
+**A quiet financial agent that finds waste, protects subscriptions, and learns
+what matters to you.**
 
-Every payment is a walker. Authorization is a route it must survive.
+Start with a real statement. SpendOS finds recurring charges, investigates the
+important ones, and turns them into a trustworthy action inbox. Its Jac-native
+authorization system remains the foundation for controlled agent spending.
 
 Built at **JacHacks San Francisco 2026** using Jac and byLLM.
 
 ## Plans
 
-- [Simple implementation plan](SIMPLE_PLAN.md) — start small, stay functional, and iterate.
-- [Comprehensive product plan](PRODUCT_PLAN.md) — long-term vision, architecture, requirements, and validation.
+- [Simple implementation plan](SIMPLE_PLAN.md) — build one working Subscription Guardian loop.
+- [Comprehensive product plan](PRODUCT_PLAN.md) — product strategy, Jac-native architecture, requirements, and validation.
 - [Original technical design](SpendOS.md) — the Jac-native authorization architecture.
 
 ---
@@ -105,11 +108,26 @@ Judges include folks from **Salesforce, Apple, and Google** — plus Ponita Ty. 
 
 ## Jac quickstart
 
-Jac has Python-like syntax and compiles to Python bytecode, JS, and native code.
+Jac ships as one native binary and compiles to Python bytecode, JavaScript, and
+native machine code. No external Python installation is required for the native
+binary.
 
 ```bash
-pip install jaclang
-jac run main.jac
+curl -fsSL https://raw.githubusercontent.com/jaseci-labs/jaseci/main/scripts/install.sh | bash
+cd spendos
+jac install --plan
+jac install
+jac precommit
+jac test
+jac start --dev
+```
+
+For current, compiler-matched language guidance:
+
+```bash
+jac guide
+jac guide --search walker
+jac mcp --inspect
 ```
 
 **The features judges are scoring:**
@@ -122,10 +140,11 @@ jac run main.jac
 | **Object-spatial programming** | Dispatch computation by *arrival at a node* |
 | **Scale invariance** | Same code runs in a terminal or across a cluster, unchanged |
 
-**Links:**
-- Language site — https://www.jac-lang.org/
-- Docs — https://www.jaseci.org
-- Source — https://github.com/jaseci-labs/jaseci
+**Official references:**
+- Language reference — https://docs.jaseci.org/reference/
+- Quick guide — https://docs.jaseci.org/quick-guide/
+- Release notes — https://docs.jaseci.org/community/release_notes/jaclang/
+- Source — https://github.com/jaseci-labs/jac
 
 The `by llm()` + walkers combination is the shortest path to scoring well on both
 "Use of Jac & Jaseci" and "Depth of agentic behavior" at once.
