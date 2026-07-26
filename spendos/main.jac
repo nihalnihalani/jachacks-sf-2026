@@ -1,4 +1,4 @@
-"""TURNSTILE — full-stack entry point.
+"""SpendOS — full-stack entry point.
 
 The client half. Deliberately decoupled from `schema.jac` / `gates.jac` for
 now: the UI runs off its scripted mock path so the frontend can never be
@@ -11,9 +11,9 @@ change in `frontend.impl.jac` — see the note there.
 import from endpoints { ScreenPayment, ResetDemo }
 
 cl {
-    import from .frontend { app as TurnstileApp }
+    import from .frontend { app as SpendOSApp }
 
     def:pub app -> JsxElement {
-        return <TurnstileApp/>;
+        return <SpendOSApp/>;
     }
 }

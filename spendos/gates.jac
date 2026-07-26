@@ -1,5 +1,5 @@
 # =============================================================
-# TURNSTILE - gates.jac
+# SpendOS - gates.jac
 # The gate chain. A payment is a walker; authorization is a route
 # it must survive. Every gate either lets the walker pass or kills
 # it with `disengage` -- and the node it died on IS the audit record.
@@ -308,7 +308,7 @@ node SettledGate(Gate) {
 # `root` is PERSISTENT across `jac run` invocations (.jac/data/<project>.db).
 # Without this, a second run starts with the treasury already drained and the
 # velocity window already full -- every payment blocks at Funds. Demo-safety:
-# call reset_turnstile() before seeding for a byte-identical re-run.
+# call reset_spendos() before seeding for a byte-identical re-run.
 #
 # PRECEDENT IS DELIBERATELY PRESERVED. A blanket `for n in [root -->] { del n; }`
 # also deletes the Precedent nodes, which silently destroys the single best
@@ -316,7 +316,7 @@ node SettledGate(Gate) {
 # from cached case law with zero LLM calls. Transient state (treasury spend,
 # velocity window, gate chain) resets; learned rulings survive. That asymmetry
 # IS the feature: the system forgets the window, not the lesson.
-def reset_turnstile() -> None {
+def reset_spendos() -> None {
     for n in [root -->] {
         if not isinstance(n, Precedent) {
             del n;
@@ -324,7 +324,7 @@ def reset_turnstile() -> None {
     }
 }
 
-def seed_turnstile() -> Treasury {
+def seed_spendos() -> Treasury {
     existing = [root -->][?:Treasury];
     if existing {
         return existing[0];
@@ -400,7 +400,7 @@ walker:pub SubmitPayment {
         reports: list[dict] = [];
 
     can submit with Root entry {
-        tre = seed_turnstile();
+        tre = seed_spendos();
         c = self.cart;
         if not c {
             c = {"category": self.category, "merchant": self.merchant,
@@ -415,10 +415,10 @@ walker:pub SubmitPayment {
     }
 }
 
-walker:pub SeedTurnstile {
+walker:pub SeedSpendOS {
     has reports: list[str] = [];
     can run with Root entry {
-        seed_turnstile();
+        seed_spendos();
         report "seeded";
     }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TURNSTILE — clean-start demo runbook.
+# SpendOS — clean-start demo runbook.
 #
 # ALWAYS rehearse from this script. `root` persists across runs, so a demo
 # started by hand inherits whatever the last run left behind: a drained
@@ -28,13 +28,13 @@ echo "==> verifying seed + OFAC dataset"
 python3 seed.py --check
 
 echo "==> running the assertion suite (0 LLM calls, no API key needed)"
-if ! jac run smoke.jac 2>&1 | tee /tmp/turnstile_smoke.out | grep -q "halted where expected"; then
+if ! jac run smoke.jac 2>&1 | tee /tmp/spendos_smoke.out | grep -q "halted where expected"; then
     echo ""
     echo "!! SMOKE FAILED — do not demo. Output:"
-    cat /tmp/turnstile_smoke.out
+    cat /tmp/spendos_smoke.out
     exit 1
 fi
-grep -E "^\s+\[|all [0-9]+ payments" /tmp/turnstile_smoke.out
+grep -E "^\s+\[|all [0-9]+ payments" /tmp/spendos_smoke.out
 
 echo ""
 if [[ -f .env ]] && grep -qE "^(OPENAI|ANTHROPIC|GEMINI)_API_KEY=.+" .env; then

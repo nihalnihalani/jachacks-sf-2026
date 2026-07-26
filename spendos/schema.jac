@@ -1,5 +1,5 @@
 # =============================================================
-# TURNSTILE - schema.jac
+# SpendOS - schema.jac
 # Nodes, typed edges, edge abilities, shared value objects.
 # Owner: GraphArchitect.  Reconciled by the walker/traversal pass:
 #   + Payment.agent_handle          (shared walker contract)

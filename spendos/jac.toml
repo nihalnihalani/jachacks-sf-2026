@@ -1,5 +1,5 @@
 [project]
-name = "turnstile"
+name = "spendos"
 version = "0.1.0"
 description = "Authorization firewall for AI agents that spend money"
 entry-point = "main.jac"

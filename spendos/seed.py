@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TURNSTILE -- synthetic seed data generator.
+SpendOS -- synthetic seed data generator.
 
 Emits the graph seed, a baseline payment corpus, the six demo attack
 scenarios, and the cached UI fallback case. Standard library only.
@@ -174,7 +174,7 @@ def fetch_ofac(timeout: int = 90) -> tuple[list[dict], dict]:
     for url in OFAC_URLS:
         try:
             req = urllib.request.Request(
-                url, headers={"User-Agent": "turnstile-seed/1.0 (hackathon; contact: local)"}
+                url, headers={"User-Agent": "spendos-seed/1.0 (hackathon; contact: local)"}
             )
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 raw = resp.read()
@@ -1184,7 +1184,7 @@ def build_scenarios(rng: random.Random, corpus: list[dict], now: datetime) -> li
         "narration": (
             "$198.50 -- fifty cents under the weekly limit, with a custom birthday cake "
             "and a $35 bottle of olive oil in the cart. It looks exactly like the kind "
-            "of thing a nervous rule engine blocks. TURNSTILE lets it through, because "
+            "of thing a nervous rule engine blocks. SpendOS lets it through, because "
             "it is groceries. A firewall that blocks everything is not a firewall."
         ),
         "why_this_matters": (
@@ -1484,7 +1484,7 @@ def build(now: datetime, refresh_ofac: bool) -> dict:
 
     return {
         "meta": {
-            "project": "TURNSTILE",
+            "project": "SpendOS",
             "generator": "seed.py",
             "schema_version": "1.0.0",
             "generated_for": iso(now),
@@ -1527,7 +1527,7 @@ def write_json(path: str, obj, compact: bool = False) -> int:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="TURNSTILE seed data generator")
+    ap = argparse.ArgumentParser(description="SpendOS seed data generator")
     ap.add_argument("--refresh-ofac", action="store_true",
                     help="re-fetch the real OFAC SDN list (network; build time only)")
     ap.add_argument("--now", default=SEED_NOW, help="anchor timestamp, ISO8601 Z")
@@ -1571,7 +1571,7 @@ def main() -> int:
     # ---- summary ----
     corpus = bundle["payments"]
     om = bundle["ofac"]["meta"]
-    print("TURNSTILE seed")
+    print("SpendOS seed")
     print("-" * 64)
     for path, size in written:
         print(f"  {os.path.relpath(path, HERE):<28} {size:>9,} bytes")

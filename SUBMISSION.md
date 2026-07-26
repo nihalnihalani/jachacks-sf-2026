@@ -1,4 +1,4 @@
-# TURNSTILE — Devpost submission draft
+# SpendOS — Devpost submission draft
 
 **Partial submission due 5:50 PM PT. Final 7:15 PM PT.**
 Repo: https://github.com/nihalnihalani/jachacks-sf-2026 · Team: @nihalnihalani · @mayu99 · @yhinai
@@ -6,7 +6,7 @@ Repo: https://github.com/nihalnihalani/jachacks-sf-2026 · Team: @nihalnihalani 
 ---
 
 ## Project name
-**TURNSTILE** — an authorization firewall for AI agents that spend money.
+**SpendOS** — an authorization firewall for AI agents that spend money.
 
 ## Elevator pitch
 We gave an AI agent a credit card and said "groceries, under $200." Here's a charge that passes every rule your bank checks — and should never have happened.
@@ -83,7 +83,7 @@ Revocation blast-radius — delete one delegation edge and watch the reachable s
 
 ## Try it
 ```bash
-cd turnstile
+cd spendos
 jac run smoke.jac      # 9 payments, 7 halt locations, 0 tokens, no API key required
 jac start -d           # UI on :8003, API on :8001   (the -d is required)
 ```

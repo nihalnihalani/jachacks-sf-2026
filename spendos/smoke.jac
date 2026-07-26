@@ -1,4 +1,4 @@
-# TURNSTILE end-to-end smoke test. ZERO LLM calls -- fast, free, deterministic.
+# SpendOS end-to-end smoke test. ZERO LLM calls -- fast, free, deterministic.
 #
 # Run after EVERY change:  jac run smoke.jac
 #
@@ -12,7 +12,7 @@
 #     transaction can see -- per-transaction reasoning cannot catch structuring
 
 import from schema { Treasury, Payment }
-import from gates { seed_turnstile, reset_turnstile }
+import from gates { seed_spendos, reset_spendos }
 import from tribunal { llm_live }
 
 def run(tre: Treasury, pid: str, amt: float, mer: str, cat: str, agent: str = "shopper-01") -> Payment {
@@ -25,8 +25,8 @@ def run(tre: Treasury, pid: str, amt: float, mer: str, cat: str, agent: str = "s
 }
 
 with entry {
-    reset_turnstile();
-    tre = seed_turnstile();
+    reset_spendos();
+    tre = seed_spendos();
 
     cases = [
         ("s1",  45.00, "FreshMart",           "grocery",     "SETTLED", "SettledGate"),
@@ -41,7 +41,7 @@ with entry {
     ];
 
     print("");
-    print("  TURNSTILE smoke -- deterministic layer, 0 LLM calls");
+    print("  SpendOS smoke -- deterministic layer, 0 LLM calls");
     print("");
 
     failures = 0;

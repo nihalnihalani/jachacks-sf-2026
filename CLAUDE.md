@@ -1,10 +1,10 @@
-# CLAUDE.md — TURNSTILE
+# CLAUDE.md — SpendOS
 
-TURNSTILE is an **authorization firewall for AI agents that spend money**. Every payment enters as a Jac **walker** and traverses a chain of **gate nodes**; failing a gate calls `disengage`, so the payment dies at the gate that killed it and **that node is the audit record**. Arithmetic gates are free and instant; the `IntentMatchGate` asks the question no rule can — *does this cart honor the mandate the human actually signed?* Built for **JacHacks SF 2026** (one-day, Founders Inc.; partial submission **5:50 PM PT**, hard deadline **7:15 PM PT**). Pitch: *"We gave an agent a credit card and said groceries under $200. Here's a charge that passes every rule your bank checks — and should never have happened."*
+SpendOS is an **authorization firewall for AI agents that spend money**. Every payment enters as a Jac **walker** and traverses a chain of **gate nodes**; failing a gate calls `disengage`, so the payment dies at the gate that killed it and **that node is the audit record**. Arithmetic gates are free and instant; the `IntentMatchGate` asks the question no rule can — *does this cart honor the mandate the human actually signed?* Built for **JacHacks SF 2026** (one-day, Founders Inc.; partial submission **5:50 PM PT**, hard deadline **7:15 PM PT**). Pitch: *"We gave an agent a credit card and said groceries under $200. Here's a charge that passes every rule your bank checks — and should never have happened."*
 
 ## Commands
 ```bash
-cd turnstile
+cd spendos
 cp .env.example .env                      # set ONE key: OPENAI_API_KEY (or ANTHROPIC/GEMINI)
 jac run smoke.jac                         # end-to-end, ZERO LLM calls — run after EVERY change
 jac run main.jac                          # full demo run (needs a key)
@@ -16,14 +16,14 @@ python3 scripts/seed.py                   # regenerate synthetic graph + attack 
 `jac` is at `~/.local/bin/jac`. **byLLM is bundled with the binary — do NOT `pip install byllm`.**
 
 ## Repo map
-- `turnstile/schema.jac` — nodes, typed edges, the self-metering `Funds` edge. Owner: GraphArchitect lane.
-- `turnstile/gates.jac` — `walker Payment` + gate chain + `disengage`. The heart. Must run with zero LLM calls.
-- `turnstile/tribunal.jac` — `by llm(tools=[...])` adjudicator, `on_iteration` budget, `ModelPool`, convergence rule.
-- `turnstile/probe.jac` — adversarial red-team agent (`conversation=` memory) + the 6-attack ladder.
-- `turnstile/memory.jac` — `Precedent` read/write + fingerprinting (the zero-token fast path).
-- `turnstile/scripts/seed.py` — synthetic graph, payment corpus, OFAC cache. stdlib only, no network at runtime.
-- `turnstile/web/demo_case.json` — pre-recorded result; the UI's last-resort fallback.
-- `TURNSTILE.md` — **product + demo source of truth.** Design disputes resolve here.
+- `spendos/schema.jac` — nodes, typed edges, the self-metering `Funds` edge. Owner: GraphArchitect lane.
+- `spendos/gates.jac` — `walker Payment` + gate chain + `disengage`. The heart. Must run with zero LLM calls.
+- `spendos/tribunal.jac` — `by llm(tools=[...])` adjudicator, `on_iteration` budget, `ModelPool`, convergence rule.
+- `spendos/probe.jac` — adversarial red-team agent (`conversation=` memory) + the 6-attack ladder.
+- `spendos/memory.jac` — `Precedent` read/write + fingerprinting (the zero-token fast path).
+- `spendos/scripts/seed.py` — synthetic graph, payment corpus, OFAC cache. stdlib only, no network at runtime.
+- `spendos/web/demo_case.json` — pre-recorded result; the UI's last-resort fallback.
+- `SpendOS.md` — **product + demo source of truth.** Design disputes resolve here.
 - `README.md` — event rules, judging criteria, deadlines. `killBill/` + `Sentinel/` — prior-event reference projects (read-only).
 
 ## Jac 0.34.6 — verified facts (do NOT rediscover these)
@@ -112,7 +112,7 @@ Gate contract: on failure set `verdict`/`halted_at`/`reason` then `disengage`. O
 - DON'T commit `.env`, `.jac/`, `__jac_gen__/`, or `node_modules/`.
 - DON'T edit `killBill/` or `Sentinel/` — reference only, and `jac/` is the upstream language repo (keep it out of the submission).
 
-## Env keys (`turnstile/.env`)
-`OPENAI_API_KEY` (default path, `gpt-4o-mini`) · `ANTHROPIC_API_KEY` · `GEMINI_API_KEY` · `TURNSTILE_MODEL` (override model id). ModelPool falls back across whatever is present; **no key at all is a supported mode** and must stay that way.
+## Env keys (`spendos/.env`)
+`OPENAI_API_KEY` (default path, `gpt-4o-mini`) · `ANTHROPIC_API_KEY` · `GEMINI_API_KEY` · `SPENDOS_MODEL` (override model id). ModelPool falls back across whatever is present; **no key at all is a supported mode** and must stay that way.
 
 ## When you make a mistake, add the rule here in the same commit as the fix. Keep this file under 150 lines — delete rules the code now makes obvious.

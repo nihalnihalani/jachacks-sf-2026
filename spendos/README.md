@@ -1,4 +1,4 @@
-<h1 align="center">TURNSTILE</h1>
+<h1 align="center">SpendOS</h1>
 
 <p align="center"><strong>An authorization firewall for AI agents that spend money.</strong></p>
 <p align="center"><em>Every payment is a walker. Authorization is a route it must survive.</em></p>
@@ -42,7 +42,7 @@ Seven halt locations, all asserted in `smoke.jac`:
 ## Quick start
 
 ```bash
-cd turnstile
+cd spendos
 ./demo.sh              # clean slate, assert 9/9, start the UI
 ./demo.sh --check      # verify only — run this before you present
 ```
@@ -92,7 +92,7 @@ Plus `on_iteration` budget hooks, `ModelPool` fallback, typed edge endpoints, an
 | 2 | no key / API down | deterministic gates — **a complete demo** |
 | 3 | backend down | UI falls back to `web/demo_case.json` |
 
-Measured in all three states: same verdict, same three corroborating signals. `TURNSTILE_FORCE_DETERMINISTIC=1` is the panic switch.
+Measured in all three states: same verdict, same three corroborating signals. `SPENDOS_FORCE_DETERMINISTIC=1` is the panic switch.
 
 ## Project layout
 

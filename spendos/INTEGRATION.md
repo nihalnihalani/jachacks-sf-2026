@@ -1,4 +1,4 @@
-# TURNSTILE — Integration Contract, Runbook & Risk Register
+# SpendOS — Integration Contract, Runbook & Risk Register
 
 Owner: IntegrationLead. **This file is the tie-breaker.** If your module disagrees with this
 document, this document wins — or you change this document first and tell the team.
@@ -10,7 +10,7 @@ Everything marked **[U]** is unverified and flagged as such.
 
 ## 0. STOP — live build blocker (as of writing)
 
-`jac run smoke.jac` in `turnstile/` **fails**:
+`jac run smoke.jac` in `spendos/` **fails**:
 
 ```
 error[E0077]: Duplicate declaration of 'Gate' (already declared as node)
@@ -32,7 +32,7 @@ error[E0077]: Duplicate declaration of 'Gate' (already declared as node)
    ```
 3. `gates.jac` keeps only the subtypes (`CapGate(Gate)`, `VelocityGate(Gate)`, …).
 
-Until this lands, `turnstile/_baseline/` holds a **verified-green** parallel implementation
+Until this lands, `spendos/_baseline/` holds a **verified-green** parallel implementation
 (`jac run smoke.jac` → `SMOKE: ALL GREEN`, zero LLM calls). That is the demo floor.
 
 ---
@@ -79,7 +79,7 @@ non-leaf, the rule is:
 > `probe.jac` declares its own local `obj Attack` and owns its own `by llm()`. Self-contained.
 
 Gates keep their logic; they just call `judge_intent(...)` instead of hosting the LLM decl.
-This also means **the node-level `def ... by llm()` in TURNSTILE.md §6 cannot be used as written.**
+This also means **the node-level `def ... by llm()` in SpendOS.md §6 cannot be used as written.**
 
 ---
 
@@ -161,7 +161,7 @@ matches on them to light up a node:
 The audience must never see a stack trace. Detection is **explicit**, never an uncaught exception.
 
 ### Layer 1 — full live system (LLM)
-Active when `ANTHROPIC_API_KEY` is set and `TURNSTILE_FORCE_DETERMINISTIC` is empty.
+Active when `ANTHROPIC_API_KEY` is set and `SPENDOS_FORCE_DETERMINISTIC` is empty.
 
 ### Layer 2 — deterministic gates only (**the real demo floor**)
 > **Right now this is the DEFAULT, not the fallback: there is no `ANTHROPIC_API_KEY` and no
@@ -171,7 +171,7 @@ Detection + degradation live in exactly one function, and it **never raises**:
 
 ```jac
 def llm_live -> bool {
-    if os.environ.get("TURNSTILE_FORCE_DETERMINISTIC", "") { return False; }
+    if os.environ.get("SPENDOS_FORCE_DETERMINISTIC", "") { return False; }
     return bool(os.environ.get("ANTHROPIC_API_KEY", ""));
 }
 
@@ -188,7 +188,7 @@ Two independent triggers — **no key** (checked before the call) and **any exce
 timeout, rate-limit, 500, bad JSON). Verified: with no key, `judge_intent` returns a correct
 deterministic `Ruling` with `tokens=0` and prints nothing alarming. **[V]**
 
-`TURNSTILE_FORCE_DETERMINISTIC=1` is the **panic switch** — set it and the demo is provably
+`SPENDOS_FORCE_DETERMINISTIC=1` is the **panic switch** — set it and the demo is provably
 repeatable regardless of network.
 
 ### Layer 3 — backend down → static JSON
@@ -209,7 +209,7 @@ Run the demo through `jac run -e none` and keep stderr off the projected screen.
 ## 5. Runbook (assume 5:45pm, stressed)
 
 ```bash
-cd /Users/nihalnihalani/Desktop/Github/jachacks/turnstile
+cd /Users/nihalnihalani/Desktop/Github/jachacks/spendos
 ```
 
 **Never run from `…/jachacks/jac/`** — that directory's `jac.toml` enables a dev-mode compiler
@@ -256,7 +256,7 @@ If port 8080 is taken: `lsof -ti:8080 | xargs kill -9`.
 3. **Close every other `jac run`/`jac start`.** Two processes on one project = `WriteConflict` **[V]**.
 4. Browser open, hard-refreshed, zoomed so gate labels are legible from the back.
 5. `web/demo_case.json` present (Layer 3 net).
-6. Decide Layer 1 vs 2 **now** and do not change it. If unsure: `export TURNSTILE_FORCE_DETERMINISTIC=1`.
+6. Decide Layer 1 vs 2 **now** and do not change it. If unsure: `export SPENDOS_FORCE_DETERMINISTIC=1`.
 7. Terminal font large; stderr not on the projected screen.
 
 ---
@@ -279,7 +279,7 @@ If port 8080 is taken: `lsof -ti:8080 | xargs kill -9`.
 ## 7. What I could not verify
 
 - **`jac start` / `walker:pub` / the served UI.** No `main.jac` or `pages/index.jac` exists yet.
-  Ports, API shape, and the client toolchain (bun/node) are all untested. TURNSTILE.md §9 says to
+  Ports, API shape, and the client toolchain (bun/node) are all untested. SpendOS.md §9 says to
   abandon the Jac frontend within 20 minutes if the toolchain fights back — **that clock has not
   started**, and it is the largest unquantified risk left.
 - **Any live LLM call.** No API key present, so Layer 1 is entirely unexercised end-to-end. The

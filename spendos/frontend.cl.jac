@@ -1,11 +1,11 @@
-"""TURNSTILE — the gate chain, rendered in Jac.
+"""SpendOS — the gate chain, rendered in Jac.
 
 Every frame of the animation is DERIVED from a single monotonic `tick`.
 No timer ever mutates animation state, so there is no stale-closure class of
 bug here and no way for the demo to desync mid-run.
 """
 
-import "./styles/turnstile.css";
+import "./styles/spendos.css";
 import from react { useEffect }
 
 # ---- the chain the walker must survive ----
@@ -242,7 +242,7 @@ def:pub app -> JsxElement {
     return
         <div className="shell">
             <div className="hdr">
-                <div className="brand">TURNSTILE</div>
+                <div className="brand">SpendOS</div>
                 <div className="tag">authorization firewall for agents that spend money</div>
             </div>
             <div className="tag">

@@ -1,4 +1,4 @@
-# TURNSTILE
+# SpendOS
 
 **An authorization firewall for AI agents that spend money.**
 Every payment is a walker. Authorization is a route it must survive.
@@ -37,7 +37,7 @@ A **red-team Probe agent** reads each rejection reason and rewrites its attack t
 ## 3. What we take from each reference project
 
 ### From killBill (its real strengths)
-| Pattern | How TURNSTILE uses it |
+| Pattern | How SpendOS uses it |
 |---|---|
 | **One genuine `by llm(tools=[...])` ReAct call** where the model picks tool order | The Tribunal adjudicator — decides *which* specialists to consult, not a fixed pipeline |
 | **Deterministic layer handles the cheap 80%** (`recurrence.py`, zero tokens) | CapGate / VelocityGate / SanctionsGate are pure arithmetic. Also the demo-safety story. |
@@ -48,7 +48,7 @@ A **red-team Probe agent** reads each rejection reason and rewrites its attack t
 | **A single headline number** | Live scoreboard: blocked / tokens saved / p50 latency |
 
 ### From Sentinel (its real strengths)
-| Pattern | How TURNSTILE uses it |
+| Pattern | How SpendOS uses it |
 |---|---|
 | **Multiple specialists over ONE shared graph**, each traversing a different path | Scope / Provenance / Sanctions / Velocity agents, each a different traversal |
 | **Convergent evidence before escalating** (2+ agents must agree) | The precision story — a single signal routes to Tribunal, not to BLOCK |
@@ -57,8 +57,8 @@ A **red-team Probe agent** reads each rejection reason and rewrites its attack t
 | **Concrete metrics as the closing slide** | Scoreboard, but every number is produced live on stage |
 
 ### What we fix — the two flaws that cost them
-- **killBill's graph is decorative.** `persist_audit_to_graph` writes nodes *after* all analysis; no walker ever traverses them. Delete the graph and the demo is byte-identical. → **In TURNSTILE, traversal IS the algorithm.**
-- **Sentinel has zero `by llm()`.** Its "5 agents" are `if claims_ratio > 3.0` inside `::py::` blocks; its "98% precision" is threshold tuning. → **In TURNSTILE, every judgment call is a real LLM decision, and the deterministic gates are honestly labeled as deterministic.**
+- **killBill's graph is decorative.** `persist_audit_to_graph` writes nodes *after* all analysis; no walker ever traverses them. Delete the graph and the demo is byte-identical. → **In SpendOS, traversal IS the algorithm.**
+- **Sentinel has zero `by llm()`.** Its "5 agents" are `if claims_ratio > 3.0` inside `::py::` blocks; its "98% precision" is threshold tuning. → **In SpendOS, every judgment call is a real LLM decision, and the deterministic gates are honestly labeled as deterministic.**
 
 **Neither project did both.** Sentinel traverses without an LLM; killBill has an LLM that never traverses. That gap is the entire opening.
 
@@ -237,7 +237,7 @@ Then `IntentMatchGate` **halts the walker red** on the graph, with the agent's r
 ## 8. File layout
 
 ```
-turnstile/
+spendos/
 ├── jac.toml                 # ModelPool config + byllm defaults
 ├── schema.jac               # nodes, typed edges, edge abilities
 ├── gates.jac                # gate nodes + Payment walker + disengage logic
@@ -258,7 +258,7 @@ Every hour ends with something runnable. That's non-negotiable.
 
 | Time | Deliverable | Owner |
 |---|---|---|
-| **+0:00–0:30** | `jac create turnstile --kind web-app`; `schema.jac` compiles; seed graph loads | A |
+| **+0:00–0:30** | `jac create spendos --kind web-app`; `schema.jac` compiles; seed graph loads | A |
 | **+0:30–1:30** | Gate chain + `Payment` walker + `disengage`. **Zero LLM — this alone is a demo.** | A |
 | **+0:30–1:30** | `seed.py`: 40 synthetic payments, 6 attack scenarios, OFAC list cached to JSON | B |
 | **+1:30–2:30** | `IntentMatchGate.judge()` + Tribunal `by llm(tools=[...])` + `ModelPool` | A+C |

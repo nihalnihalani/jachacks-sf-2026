@@ -1,4 +1,4 @@
-"""TURNSTILE -- probe.jac
+"""SpendOS -- probe.jac
 
 The adversarial red-team Probe.
 
@@ -19,7 +19,7 @@ same six code paths. The demo is identical either way.
 """
 
 import os;
-import from gates { seed_turnstile, reset_turnstile }
+import from gates { seed_spendos, reset_spendos }
 import from schema { Payment }
 import from jaclang.byllm.lib {
     IterationAction,
@@ -669,8 +669,8 @@ glob PROBE_AGENT: str = "shopper-01-sub";
 
 with entry:__main__ {
     reset_probe();
-    reset_turnstile();
-    tre = seed_turnstile();
+    reset_spendos();
+    tre = seed_spendos();
     print(f"MANDATE: {MANDATE}");
     print(f"live={probe_is_live()}  max_attempts={PROBE_MAX_ATTEMPTS}\n");
 

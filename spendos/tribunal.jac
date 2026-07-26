@@ -1,4 +1,4 @@
-"""TURNSTILE -- the Tribunal. The agentic core.
+"""SpendOS -- the Tribunal. The agentic core.
 
 Reached only when a cheaper gate reports *uncertain*. `TribunalGate.deliberate`
 is one genuine ReAct call: the MODEL plans which evidence it needs and calls the
@@ -974,7 +974,7 @@ def _fallback_proposal(err: str) -> Ruling {
 # constructs with zero API keys present; it raises only at call time. So the
 # import of this module can never fail on a missing key.
 #
-# TURNSTILE_FORCE_DETERMINISTIC=1 is the panic switch from INTEGRATION.md §4.
+# SPENDOS_FORCE_DETERMINISTIC=1 is the panic switch from INTEGRATION.md §4.
 # ============================================================================
 
 # The offline stand-in replays attack #1. These MUST match what the seed writes,
@@ -986,7 +986,7 @@ glob DEMO_MANDATE: str = "groceries, under $200/week";
 
 
 def llm_live() -> bool {
-    if os.environ.get("TURNSTILE_FORCE_DETERMINISTIC", "") {
+    if os.environ.get("SPENDOS_FORCE_DETERMINISTIC", "") {
         return False;
     }
     return bool(_live_models());
@@ -1070,7 +1070,7 @@ def _offline_model() -> MockLLM {
 
 
 def _build_llm() -> object {
-    if os.environ.get("TURNSTILE_FORCE_DETERMINISTIC", "") {
+    if os.environ.get("SPENDOS_FORCE_DETERMINISTIC", "") {
         return _offline_model();
     }
     live = _live_models();

@@ -1,6 +1,6 @@
-# TURNSTILE - demo driver. Zero LLM calls.
+# SpendOS - demo driver. Zero LLM calls.
 import from schema { Treasury, Payment, Funds }
-import from gates { seed_turnstile, reset_turnstile, CapGate, VelocityGate, SanctionsGate,
+import from gates { seed_spendos, reset_spendos, CapGate, VelocityGate, SanctionsGate,
                     IntentMatchGate, TribunalGate, SettledGate }
 
 def submit(tre: Treasury, pid: str, amt: float, mer: str, cat: str) -> Payment {
@@ -19,10 +19,10 @@ def submit(tre: Treasury, pid: str, amt: float, mer: str, cat: str) -> Payment {
 }
 
 with entry {
-    reset_turnstile();          # stage-safety: root persists across runs
-    tre = seed_turnstile();
+    reset_spendos();          # stage-safety: root persists across runs
+    tre = seed_spendos();
     print("=" * 100);
-    print("TURNSTILE gate chain  |  route: Funds(edge) > CapGate > VelocityGate > SanctionsGate > IntentMatchGate > [Tribunal] > Settled");
+    print("SpendOS gate chain  |  route: Funds(edge) > CapGate > VelocityGate > SanctionsGate > IntentMatchGate > [Tribunal] > Settled");
     print("=" * 100);
 
     res = [

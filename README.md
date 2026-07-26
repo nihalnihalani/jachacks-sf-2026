@@ -1,4 +1,20 @@
-# JacHacks SF 2026
+# SpendOS
+
+**An authorization firewall and financial operating system for AI agents that spend money.**
+
+Every payment is a walker. Authorization is a route it must survive.
+
+Built at **JacHacks San Francisco 2026** using Jac and byLLM.
+
+## Plans
+
+- [Simple implementation plan](SIMPLE_PLAN.md) — start small, stay functional, and iterate.
+- [Comprehensive product plan](PRODUCT_PLAN.md) — long-term vision, architecture, requirements, and validation.
+- [Original technical design](SpendOS.md) — the Jac-native authorization architecture.
+
+---
+
+## Hackathon context
 
 Team repo for **JacHacks San Francisco** — a one-day, in-person AI hackathon built around
 [Jac](https://www.jac-lang.org/), the AI-native programming language from Jaseci Labs.

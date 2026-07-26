@@ -1,4 +1,4 @@
-"""TURNSTILE server endpoints.
+"""SpendOS server endpoints.
 
 The client calls these with `root spawn` across the codespace boundary --
 no fetch, no REST client, no Express. That cross-codespace call is the
@@ -7,7 +7,7 @@ claim: it shipped 4,479 lines of React plus an Express server to do what
 this file does in forty.
 """
 
-import from gates { seed_turnstile, reset_turnstile }
+import from gates { seed_spendos, reset_spendos }
 import from schema { Payment }
 
 walker:pub ScreenPayment {
@@ -19,7 +19,7 @@ walker:pub ScreenPayment {
         reports: list[dict] = [];
 
     can screen with Root entry {
-        tre = seed_turnstile();
+        tre = seed_spendos();
         pay = Payment(
             payment_id=self.payment_id, amount=self.amount,
             merchant=self.merchant, category=self.category,
@@ -39,15 +39,15 @@ walker:pub ResetDemo {
     button hits a different gate than the first, which on stage reads as a
     bug rather than as accumulation. The UI calls this between runs.
 
-    Precedent nodes deliberately SURVIVE (see reset_turnstile in gates.jac):
+    Precedent nodes deliberately SURVIVE (see reset_spendos in gates.jac):
     the system forgets the window, not the lesson. That asymmetry is the
     'it learned' beat.
     """
     has reports: list[str] = [];
 
     can reset with Root entry {
-        reset_turnstile();
-        seed_turnstile();
+        reset_spendos();
+        seed_spendos();
         report "reset";
     }
 }
