@@ -38,9 +38,8 @@ python3 scripts/seed.py                   # regenerate synthetic graph + attack 
 - **Plain `visit [-->]` crosses edges WITHOUT firing their abilities.** Only `visit [edge -->]` (or spawning on an edge) wakes them. Get this wrong and the `Funds` edge accounting silently no-ops — no error, just wrong numbers. Verified: `jac/docs/docs/reference/language/osp.md:215-222`.
 - **Node-level LLM methods compile**: `node G { def judge(c: dict) -> Ruling by llm(); }` — proven by compile spike, not assumed.
 - **Typed edge endpoints work**: `edge Funds: Treasury --> AgentIdentity { has cap: float; }` (`osp.md:248`).
-- `disengage`, `visitor`, `here`, edge abilities (`can meter with Payment entry`) all compile at 0.34.5.
+- `visitor`, `here`, and edge abilities all compile at 0.34.6.
 - `Model(model_name=...)` constructs at glob scope **without** an API key present — only invocation needs one. This is why Layer-2 degradation works.
-- `jac create <name> --kind web-app` scaffolds a full-stack app with the frontend written in Jac (`cl`/`sv` codespaces, `JsxPage` routing). **Status: spike pending** — treat as unproven until FrontendScout returns GO with command output.
 
 ## Interface contract (change it in every module in the SAME commit, or don't change it)
 ```jac
