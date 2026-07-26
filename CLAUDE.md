@@ -8,7 +8,9 @@ cd turnstile
 cp .env.example .env                      # set ONE key: OPENAI_API_KEY (or ANTHROPIC/GEMINI)
 jac run smoke.jac                         # end-to-end, ZERO LLM calls — run after EVERY change
 jac run main.jac                          # full demo run (needs a key)
-jac start gates.jac --port 8000           # walkers become REST endpoints
+jac start -d                              # UI on :8003 + API on :8001. The -d IS REQUIRED --
+                                          # bare `jac start` serves the API only, no client build.
+jac start gates.jac --port 8077           # backend only; walkers as REST (reports are under data.reports)
 python3 scripts/seed.py                   # regenerate synthetic graph + attack corpus
 ```
 `jac` is at `~/.local/bin/jac`. **byLLM is bundled with the binary — do NOT `pip install byllm`.**
