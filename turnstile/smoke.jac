@@ -13,6 +13,7 @@
 
 import from schema { Treasury, Payment }
 import from gates { seed_turnstile, reset_turnstile }
+import from tribunal { llm_live }
 
 def run(tre: Treasury, pid: str, amt: float, mer: str, cat: str, agent: str = "shopper-01") -> Payment {
     p = Payment(
@@ -58,16 +59,22 @@ with entry {
         if not ok { print(f"         expected {want_v} @ {want_h}"); }
     }
 
-    # The deterministic layer must NEVER reach a model. If this trips, the
-    # zero-key demo-safety floor is gone and nothing else would tell us.
-    if used != 0 {
-        print(f"  [FAIL] deterministic layer consumed {used} tokens; must be 0");
+    # The zero-key floor must never quietly reach a model. With no key
+    # configured, spending a token means something bypassed the degradation
+    # path and nothing else would tell us. With a key configured, spending
+    # tokens is the point -- asserting 0 there would be asserting the feature
+    # is off.
+    live = llm_live();
+    if not live and used != 0 {
+        print(f"  [FAIL] zero-key floor consumed {used} tokens; must be 0");
         failures += 1;
     }
 
     print("");
     if failures == 0 {
-        print(f"  all {len(cases)} payments halted where expected, 0 tokens");
+        mode = "LAYER 1 live model";
+        if not live { mode = "LAYER 2 deterministic, 0 tokens"; }
+        print(f"  all {len(cases)} payments halted where expected -- {mode}, {used} tokens");
     } else {
         print(f"  {failures} failure(s)");
     }

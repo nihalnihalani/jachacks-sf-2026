@@ -231,14 +231,26 @@ node TribunalGate(Gate) {
             if not why { why = "no adverse evidence found"; }
         }
 
-        if len(srcs) >= self.quorum and res.ruling.blocked {
+        # QUORUM DECIDES, not the model's concurrence.
+        #
+        # This previously required `len(srcs) >= quorum AND res.ruling.blocked`,
+        # which handed a live model a veto over converging evidence -- and made
+        # the verdict non-deterministic on stage: the same cart blocked or went
+        # to review depending on how the model felt that run. A firewall whose
+        # answer changes between identical inputs is not a firewall.
+        #
+        # The model is ONE input to the evidence ledger, not the adjudicator.
+        # When two independent specialists -- different subgraphs, different
+        # datasets -- both find something adverse, that IS the decision. The
+        # model's prose explains the verdict; it does not get to overturn it.
+        if len(srcs) >= self.quorum {
             visitor.halt(self.label, "BLOCKED", why);
             disengage;
         }
         if len(srcs) >= 1 or res.ruling.blocked or res.ruling.uncertain {
             visitor.halt(
                 self.label, "REVIEW",
-                f"{len(srcs)} source(s) below quorum {self.quorum} "
+                f"{len(srcs)} independent source(s), quorum is {self.quorum} "
                 + f"-- escalated to human: {why}"
             );
             disengage;

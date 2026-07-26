@@ -801,6 +801,27 @@ def judge_intent(mandate: str, allowed: list[str], amount: float,
         r = _coerce_ruling(_judge_llm(summary, mandate),
                            "The intent gate could not reach a model.");
         r.tokens = 0;
+
+        # DOWNGRADE A LIVE BLOCK TO AN ESCALATION -- structurally, not by asking.
+        #
+        # The semstring tells the model to prefer `uncertain` and reserve
+        # `blocked` for plain violations. With a real model behind the gate it
+        # returned blocked=True anyway, and the gate honoured it: ONE model
+        # opinion, at one gate, killing a payment outright. That is precisely
+        # what the convergence rule exists to prevent, and we cannot claim
+        # "enforced in Jac, not in the prompt" while the single place a live
+        # model touches the verdict is enforced only by the prompt.
+        #
+        # The model's judgement is not discarded -- it becomes the first
+        # adverse signal, and the Tribunal decides whether a second,
+        # independent source corroborates it.
+        if r.blocked {
+            return Ruling(
+                blocked=False, uncertain=True,
+                confidence=r.confidence, tokens=r.tokens,
+                reason=r.reason
+            );
+        }
         return r;
     } except Exception {
         return _judge_rules(mandate, allowed, amount, merchant, category, cart);
