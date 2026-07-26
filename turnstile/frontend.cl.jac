@@ -23,9 +23,12 @@ glob THINK: int = 26;     # extra ticks while the LLM streams its reasoning
 glob TICK_MS: int = 110;
 
 # ---- scripted outcomes (mock path: demos with the backend down) ----
+sv import from endpoints { ScreenPayment }
+
 glob SCENARIOS: dict = {
     "attack": {
         "label": "$340 · Gift-card reseller",
+        "amount": 180.0, "merchant": "QuickBuy Digital", "category": "gift_card",
         "halt": 3, "think_at": 3, "cached": False,
         "verdict": "BLOCKED", "halted_at": "IntentMatchGate",
         "reason": "Mandate authorizes groceries. This cart is a $340 gift card.",
@@ -34,6 +37,7 @@ glob SCENARIOS: dict = {
     },
     "replay": {
         "label": "Replay of attack #1",
+        "amount": 180.0, "merchant": "QuickBuy Digital", "category": "gift_card",
         "halt": 3, "think_at": -1, "cached": True,
         "verdict": "BLOCKED", "halted_at": "IntentMatchGate (precedent)",
         "reason": "Precedent P-0x41: identical fingerprint ruled BLOCKED. 0 tokens.",
@@ -41,6 +45,7 @@ glob SCENARIOS: dict = {
     },
     "legit": {
         "label": "$62 · Whole Foods",
+        "amount": 62.0, "merchant": "FreshMart", "category": "grocery",
         "halt": -1, "think_at": 3, "cached": False,
         "verdict": "SETTLED", "halted_at": "Settled",
         "reason": "Cart matches mandate. Within cap and weekly velocity.",
@@ -164,13 +169,11 @@ def:pub app -> JsxElement {
         return last_index();
     }
 
-    def launch(k: str) -> None {
-        tick = 0;
-        key = k;
-        started = True;
-        running = True;
-        history = history + [SCENARIOS[k]];
-    }
+    # LIVE. Implemented in frontend.impl.jac -- it calls the real gate chain
+    # via `root spawn ScreenPayment(...)` across the codespace boundary and
+    # falls back to the scripted scenario if the backend is unreachable, so
+    # the demo cannot show an error.
+    async def launch(k: str) -> None;
 
     # ---- scoreboard, derived from completed runs ----
     def n_screened -> int { return len(history); }
