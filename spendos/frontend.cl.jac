@@ -69,7 +69,17 @@ def:pub app -> JsxElement {
         started: bool = False,
         history: list = [];
 
+    # The CURRENT record drives every visual: gate lamps, verdict, reasoning.
+    # This returned SCENARIOS[key] unconditionally, so the whole panel rendered
+    # from the script even when the live walker had already answered -- the real
+    # result reached only the scoreboard and was otherwise discarded. A demo
+    # that calls a real backend and then draws something else is not a live
+    # demo. Prefer the latest result; fall back to the script only before the
+    # first run, or when the backend was unreachable.
     def scn -> dict {
+        if history {
+            return history[len(history) - 1];
+        }
         return SCENARIOS[key];
     }
 
@@ -344,7 +354,9 @@ def:pub app -> JsxElement {
             <div className="foot">
                 <span className="live"/>
                 {s["label"]} · tick {tick} ·
-                <span className="badge-mock"> mock data path</span>
+                {s.get("live", False)
+                 and <span className="badge-live"> live · real gate chain</span>
+                 or <span className="badge-mock"> scripted fallback</span>}
             </div>
         </div>;
 }

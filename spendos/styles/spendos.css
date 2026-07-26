@@ -561,3 +561,20 @@ body {
     .gname { color: #e8ebef; }
     .tag, .stat-l, .gkind { color: #9aa3ad; }
 }
+
+/* Truthful path disclosure. The badge previously read "mock data path"
+   unconditionally, which made it decoration rather than disclosure -- it said
+   "mock" even when the real walker had answered. It now reports which path
+   actually ran, so the honesty commitment is enforced by the UI rather than
+   by the presenter remembering to say it. */
+.badge-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 9px;
+    color: #00e08a;
+    background: #04231a;
+    border: 1px solid rgba(0, 224, 138, 0.4);
+    border-radius: 2px;
+    letter-spacing: 0.12em;
+}

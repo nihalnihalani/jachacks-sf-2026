@@ -37,6 +37,10 @@ impl app.launch(k: str) -> None {
             "tokens": r["tokens"], "latency": s["latency"], "live": True
         }];
     } except Exception as e {
-        history = history + [s];
+        # Surface the reason rather than silently pretending. A fallback that
+        # hides why it fell back is how a "live" demo quietly becomes scripted.
+        fb = dict(s);
+        fb["label"] = f"{s['label']} [fallback: {str(e)[:70]}]";
+        history = history + [fb];
     }
 }
