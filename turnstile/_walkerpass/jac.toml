@@ -1,0 +1,5 @@
+[project]
+name = "turnstile_walkerpass"
+
+[byllm.model]
+default_model = "anthropic/claude-sonnet-4-6"
