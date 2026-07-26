@@ -1,221 +1,563 @@
-/* TURNSTILE — projector-grade dark theme.
-   Everything here is sized for a judge standing across a room. */
+/* ===========================================================================
+   TURNSTILE — annunciator panel
+   ---------------------------------------------------------------------------
+   An authorization firewall IS an annunciator panel, so the design obeys the
+   discipline of one: exactly THREE lamp colours (pass / caution / fault),
+   monospace throughout because everything on screen is machine output, and
+   sharp rectangular geometry with no decorative gradients. The previous
+   blue-to-purple gradient read as "SaaS dashboard"; this reads as a control
+   system, which is what it is.
 
-:global(html), :global(body), :global(#root) {
+   The real constraint is a projector, four metres away, dark room, three
+   minutes. Every decision below serves legibility first:
+     * type scales with the viewport (clamp) so it fills 1024x768 or 4K
+     * tabular numerals, so changing figures never jitter mid-sentence
+     * a halt floods its housing red and strikes — readable across a room
+     * colour NEVER carries meaning alone; every lamp state also has a glyph
+   =========================================================================== */
+
+html, body, #root {
     margin: 0;
     padding: 0;
-    background: #07090f;
-    color: #e8edf7;
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    height: 100%;
 }
+
+body {
+    background: #07080a;
+    color: #c9ced6;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono",
+                 Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: clamp(12px, 0.95vw, 15px);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+}
+
+* { box-sizing: border-box; }
+
+/* --- panel substrate: scanlines + vignette. Pure CSS, zero assets. ------- */
 
 .shell {
-    min-height: 100vh;
-    padding: 28px 34px 40px;
-    /* Set explicitly: the :global(body) rule is not a reliable inheritance
-       source once the module CSS is scoped and hashed. */
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    color: #e8edf7;
-    background:
-        radial-gradient(1100px 520px at 12% -12%, #12203a 0%, rgba(7,9,15,0) 62%),
-        #07090f;
+    position: relative;
+    min-height: 100%;
+    max-width: 1680px;
+    margin: 0 auto;
+    padding: clamp(12px, 1.6vw, 22px) clamp(14px, 2.4vw, 40px) 40px;
+    isolation: isolate;
 }
 
-/* ---------- header ---------- */
-.hdr { display: flex; align-items: baseline; gap: 18px; margin-bottom: 6px; }
+/* CRT scanlines — texture, deliberately near-subliminal. */
+.shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9;
+    background: repeating-linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.014) 0px,
+        rgba(255, 255, 255, 0.014) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+}
+
+/* Vignette — pulls the eye to the chain. */
+.shell::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 8;
+    background: radial-gradient(120% 80% at 50% 38%, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* ============================ header ==================================== */
+
+.hdr {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(10px, 1.6vw, 24px);
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #1b2027;
+}
+
 .brand {
-    font-size: 40px; font-weight: 800; letter-spacing: -0.03em;
-    background: linear-gradient(92deg, #6ee7ff, #7c9cff 55%, #b48cff);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
+    position: relative;
+    font-size: clamp(20px, 2.5vw, 34px);
+    font-weight: 700;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: #f4f6f8;
 }
-.tag { font-size: 16px; color: #8595b4; letter-spacing: 0.01em; }
 
-/* ---------- gate chain ---------- */
-/* padding-top leaves room for the walker token, which sits above each gate
-   and would otherwise be clipped by the scroll container. */
+/* The only ornament: a lit hairline, like a panel legend. */
+.brand::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0.34em;
+    bottom: -13px;
+    height: 2px;
+    background: #00e08a;
+    box-shadow: 0 0 14px rgba(0, 224, 138, 0.55);
+}
+
+.tag {
+    color: #6e7681;
+    font-size: clamp(10px, 0.95vw, 13px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.hdr + .tag {
+    display: block;
+    padding: 14px 0 clamp(16px, 2.4vw, 30px);
+    color: #59616c;
+}
+
+/* ============================ gate chain ================================ */
+/* The hero. One horizontal row: no wrap, no scroll, and no force-directed
+   layout — it is a linear chain, and pretending otherwise would only obscure
+   it while costing legibility on a projector. */
+
 .chain {
-    display: flex; align-items: stretch; gap: 0;
-    margin: 34px 0 10px; flex-wrap: nowrap;
-    padding: 26px 2px 10px;
+    display: flex;
+    align-items: stretch;
+    padding: clamp(14px, 2vw, 26px) 0 clamp(18px, 2.4vw, 32px);
 }
-.gwrap { display: flex; align-items: center; flex: 1 1 0; min-width: 0; }
-.gwrap:last-child { flex: 0 1 auto; }
 
+.gwrap {
+    display: flex;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+    /* One orchestrated load, staggered — beats scattered micro-interactions. */
+    animation: ts-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.gwrap:nth-child(1) { animation-delay: 0ms; }
+.gwrap:nth-child(2) { animation-delay: 55ms; }
+.gwrap:nth-child(3) { animation-delay: 110ms; }
+.gwrap:nth-child(4) { animation-delay: 165ms; }
+.gwrap:nth-child(5) { animation-delay: 220ms; }
+.gwrap:nth-child(6) { animation-delay: 275ms; }
+/* every gate gets equal width; the last one was being clipped */
+
+@keyframes ts-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* --- connector --- */
+.link {
+    flex: 0 1 clamp(10px, 2vw, 34px);
+    min-width: 8px;
+    height: 2px;
+    background: #2a313b;
+}
+
+.link-on {
+    background: #00e08a;
+    box-shadow: 0 0 10px rgba(0, 224, 138, 0.5);
+}
+
+/* Dashed, not solid — the route was severed, so it should look severed. */
+.link-dead {
+    background: repeating-linear-gradient(
+        90deg, #2a060c 0 4px, transparent 4px 8px
+    );
+}
+
+/* --- the gate: a lamp housing --- */
 .gate {
-    position: relative; flex: 1 1 auto; min-width: 0;
-    padding: 16px 13px 14px;
-    border-radius: 14px;
-    border: 2px solid #223049;
-    background: linear-gradient(180deg, #111827 0%, #0c1220 100%);
-    transition: transform .18s ease, box-shadow .28s ease,
-                border-color .28s ease, background .28s ease;
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: clamp(12px, 1.5vw, 20px) clamp(8px, 1vw, 14px) clamp(10px, 1.2vw, 16px);
+    background: #0c0e11;
+    border: 1px solid #1b2027;
+    border-top: 3px solid #2a313b;
+    border-radius: 2px;
+    text-align: center;
+    min-height: clamp(78px, 8.5vw, 116px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: background 180ms linear, border-color 180ms linear;
 }
+
 .gname {
-    font-size: 16.5px; font-weight: 700; letter-spacing: -0.02em;
-    color: #cbd6ea; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis;
+    font-size: clamp(11px, 1.15vw, 16px);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #c9ced6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 .gkind {
-    margin-top: 5px; font-size: 11px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .13em; color: #64748b;
+    margin-top: 4px;
+    font-size: clamp(8px, 0.72vw, 10px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #545c67;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+/* Status glyph. Colour is never the only signal. */
 .gmark {
-    position: absolute; top: 10px; right: 12px;
-    font-size: 19px; font-weight: 800; line-height: 1;
+    height: 1.5em;
+    margin-top: 8px;
+    font-size: clamp(14px, 1.5vw, 21px);
+    font-weight: 700;
+    line-height: 1.5;
 }
 
-/* pending */
-.g-idle { opacity: .5; }
+/* --- lamp states --- */
 
-/* currently inspecting */
-.g-active {
-    border-color: #7c9cff;
-    box-shadow: 0 0 0 4px rgba(124,156,255,.16), 0 0 34px rgba(124,156,255,.42);
-    animation: gpulse 1s ease-in-out infinite;
-}
-@keyframes gpulse {
-    0%, 100% { transform: translateY(0)     scale(1); }
-    50%      { transform: translateY(-3px)  scale(1.035); }
-}
-
-/* passed */
 .g-pass {
-    border-color: #10d98a;
-    background: linear-gradient(180deg, #06301f 0%, #072517 100%);
-    box-shadow: 0 0 24px rgba(16,217,138,.30);
-    animation: gflash .5s ease-out;
+    background: linear-gradient(180deg, #04231a, #0c0e11 70%);
+    border-color: rgba(0, 224, 138, 0.34);
+    border-top-color: #00e08a;
 }
-.g-pass .gname { color: #6ef7c0; }
-@keyframes gflash {
-    0%   { box-shadow: 0 0 0 0 rgba(16,217,138,.85); transform: scale(1); }
-    45%  { box-shadow: 0 0 0 15px rgba(16,217,138,0); transform: scale(1.07); }
-    100% { box-shadow: 0 0 24px rgba(16,217,138,.30); transform: scale(1); }
-}
+.g-pass .gmark { color: #00e08a; }
+.g-pass .gname { color: #dff8ec; }
 
-/* THE MOMENT — halted red. Must read from across the room. */
+/* The moment the entire demo exists for. It must read from four metres. */
 .g-halt {
-    border-color: #ff3355;
-    background: linear-gradient(180deg, #3d0713 0%, #26060e 100%);
-    box-shadow: 0 0 0 5px rgba(255,51,85,.20), 0 0 60px rgba(255,51,85,.75);
-    animation: ghalt .42s cubic-bezier(.36,.07,.19,.97) both, ghalt_glow 1.25s ease-in-out .42s infinite;
+    background: linear-gradient(180deg, #2a060c, #0c0e11 78%);
+    border-color: rgba(255, 47, 66, 0.55);
+    border-top-color: #ff2f42;
+    box-shadow:
+        0 0 0 1px rgba(255, 47, 66, 0.35),
+        0 0 60px rgba(255, 47, 66, 0.42),
+        inset 0 0 34px rgba(255, 47, 66, 0.14);
+    animation: ts-strike 520ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    z-index: 2;
 }
-.g-halt .gname { color: #ff8fa3; }
-@keyframes ghalt {
-    0%       { transform: translateX(0)     scale(1); }
-    18%      { transform: translateX(-11px) scale(1.10); }
-    38%      { transform: translateX(9px)   scale(1.10); }
-    58%      { transform: translateX(-6px)  scale(1.07); }
-    78%      { transform: translateX(4px)   scale(1.04); }
-    100%     { transform: translateX(0)     scale(1.05); }
-}
-@keyframes ghalt_glow {
-    0%, 100% { box-shadow: 0 0 0 5px rgba(255,51,85,.20), 0 0 55px rgba(255,51,85,.60); }
-    50%      { box-shadow: 0 0 0 9px rgba(255,51,85,.10), 0 0 95px rgba(255,51,85,.95); }
-}
+.g-halt .gmark { color: #ff2f42; }
+.g-halt .gname { color: #ffd9de; }
 
-/* precedent fast-path: blocked from memory, zero tokens */
 .g-cache {
-    border-color: #ffb020;
-    background: linear-gradient(180deg, #3a2606 0%, #241705 100%);
-    box-shadow: 0 0 0 4px rgba(255,176,32,.16), 0 0 46px rgba(255,176,32,.55);
+    background: linear-gradient(180deg, #241a04, #0c0e11 78%);
+    border-color: rgba(255, 176, 35, 0.5);
+    border-top-color: #ffb023;
+    box-shadow: 0 0 40px rgba(255, 176, 35, 0.3);
+    animation: ts-flicker 340ms steps(2) 2;
 }
-.g-cache .gname { color: #ffd27a; }
+.g-cache .gmark { color: #ffb023; }
+.g-cache .gname { color: #ffe9c2; }
 
-/* connectors */
-.link { width: 26px; min-width: 14px; height: 3px; background: #1e2a40; flex: 0 1 auto; border-radius: 2px; }
-.link-on   { background: linear-gradient(90deg, #10d98a, #34d399); box-shadow: 0 0 12px rgba(16,217,138,.6); }
-.link-dead { background: #4a1020; }
+/* Gates the walker never reached — present, but plainly not part of the story. */
+.g-dead {
+    opacity: 0.28;
+    filter: saturate(0.2);
+}
 
-/* the walker token */
+@keyframes ts-strike {
+    0%   { transform: translateX(0); }
+    15%  { transform: translateX(-7px); }
+    32%  { transform: translateX(6px); }
+    50%  { transform: translateX(-4px); }
+    68%  { transform: translateX(3px); }
+    100% { transform: translateX(0); }
+}
+
+/* A real annunciator lamp stutters before it holds. */
+@keyframes ts-flicker {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+}
+
+/* --- the walker token riding the chain --- */
 .walker {
-    position: absolute; left: 50%; top: -20px; transform: translateX(-50%);
-    font-size: 12px; font-weight: 800; letter-spacing: .09em;
-    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
-    background: #7c9cff; color: #06070d;
-    box-shadow: 0 0 20px rgba(124,156,255,.85);
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 9px;
+    font-size: clamp(8px, 0.72vw, 10px);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    white-space: nowrap;
+    background: #00e08a;
+    color: #04150e;
+    border-radius: 1px;
+    box-shadow: 0 0 18px rgba(0, 224, 138, 0.6);
+    animation: ts-flicker 900ms steps(2) infinite;
 }
-.walker-dead { background: #ff3355; color: #fff; box-shadow: 0 0 26px rgba(255,51,85,.95); }
 
-/* ---------- verdict banner ---------- */
+.walker-dead {
+    background: #ff2f42;
+    color: #fff;
+    box-shadow: 0 0 26px rgba(255, 47, 66, 0.95);
+    animation: none;
+}
+
+/* ============================ verdict banner ============================= */
+
 .verdict {
-    margin: 20px 0 6px; padding: 18px 22px; border-radius: 14px;
-    border-left: 8px solid #334; background: #0d1424;
-    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    display: flex;
+    align-items: stretch;
+    gap: clamp(12px, 1.6vw, 24px);
+    margin: 0 0 clamp(16px, 2vw, 26px);
+    padding: clamp(14px, 1.8vw, 22px) clamp(14px, 1.8vw, 24px);
+    background: #0c0e11;
+    border: 1px solid #1b2027;
+    border-left: 6px solid #2a313b;
+    border-radius: 2px;
+    animation: ts-rise 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.v-blocked { border-left-color: #ff3355; background: linear-gradient(90deg, #2a0810, #0d1424 65%); }
-.v-settled { border-left-color: #10d98a; background: linear-gradient(90deg, #052618, #0d1424 65%); }
-.v-cached  { border-left-color: #ffb020; background: linear-gradient(90deg, #2b1c05, #0d1424 65%); }
-.v-word    { font-size: 33px; font-weight: 900; letter-spacing: -.02em; }
-.v-blocked .v-word { color: #ff5570; }
-.v-settled .v-word { color: #10d98a; }
-.v-cached  .v-word { color: #ffb020; }
-.v-why  { font-size: 19px; color: #dbe4f5; line-height: 1.4; flex: 1; min-width: 260px; }
-.v-at   { font-size: 13px; color: #8595b4; text-transform: uppercase; letter-spacing: .12em; }
 
-/* ---------- panes ---------- */
-.cols { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; margin-top: 18px; }
-@media (max-width: 1080px) { .cols { grid-template-columns: 1fr; } }
+.v-word {
+    align-self: center;
+    font-size: clamp(26px, 4.4vw, 62px);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.v-why {
+    flex: 1;
+    align-self: center;
+    min-width: 0;
+    color: #c9ced6;
+    font-size: clamp(11px, 1.05vw, 15px);
+    line-height: 1.55;
+    word-break: break-word;
+}
+
+.v-at {
+    margin-top: 8px;
+    color: #6e7681;
+    font-size: clamp(9px, 0.82vw, 11px);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.v-blocked { border-left-color: #ff2f42; background: linear-gradient(90deg, #2a060c, #0c0e11 55%); }
+.v-blocked .v-word { color: #ff2f42; text-shadow: 0 0 40px rgba(255, 47, 66, 0.6); }
+
+.v-settled { border-left-color: #00e08a; background: linear-gradient(90deg, #04231a, #0c0e11 55%); }
+.v-settled .v-word { color: #00e08a; text-shadow: 0 0 40px rgba(0, 224, 138, 0.5); }
+
+.v-cached { border-left-color: #ffb023; background: linear-gradient(90deg, #241a04, #0c0e11 55%); }
+.v-cached .v-word { color: #ffb023; text-shadow: 0 0 40px rgba(255, 176, 35, 0.5); }
+
+/* ============================ panes ===================================== */
+
+.cols {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: clamp(12px, 1.6vw, 22px);
+}
 
 .pane {
-    background: #0b111e; border: 1px solid #1c2740;
-    border-radius: 14px; padding: 16px 18px;
+    min-width: 0;
+    padding: 0 0 clamp(12px, 1.4vw, 18px);
+    background: #0c0e11;
+    border: 1px solid #1b2027;
+    border-radius: 2px;
 }
+
 .pane-h {
-    font-size: 12px; font-weight: 800; text-transform: uppercase;
-    letter-spacing: .16em; color: #7c9cff; margin-bottom: 12px;
+    padding: 9px clamp(12px, 1.4vw, 18px);
+    margin-bottom: clamp(10px, 1.2vw, 16px);
+    background: #12151a;
+    border-bottom: 1px solid #1b2027;
+    color: #6e7681;
+    font-size: clamp(9px, 0.78vw, 11px);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
 }
 
-/* reasoning stream */
+/* --- reasoning stream --- */
 .think {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 15px; line-height: 1.62; color: #b9c7e0;
-    min-height: 190px; max-height: 260px; overflow-y: auto; white-space: pre-wrap;
+    padding: 0 clamp(12px, 1.4vw, 18px);
+    min-height: 8.5em;
+    font-size: clamp(11px, 1vw, 14px);
+    line-height: 1.65;
+    color: #c9ced6;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
-.think-tok { animation: fadein .22s ease-out; }
-@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+.think-tok { color: #aab2bd; }
+
 .caret {
-    display: inline-block; width: 9px; height: 18px; vertical-align: -3px;
-    background: #7c9cff; animation: blink .9s steps(2) infinite;
+    display: inline-block;
+    width: 8px;
+    height: 1.05em;
+    margin-left: 3px;
+    vertical-align: text-bottom;
+    background: #00e08a;
+    animation: ts-blink 900ms steps(2) infinite;
 }
-@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 
-/* scoreboard */
-.score { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@keyframes ts-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* --- scoreboard --- */
+.score {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(10px, 1.2vw, 16px);
+    padding: 0 clamp(12px, 1.4vw, 18px);
+}
+
 .stat {
-    background: #0d1526; border: 1px solid #1c2740;
-    border-radius: 12px; padding: 13px 15px;
+    padding: clamp(10px, 1.2vw, 15px) clamp(10px, 1.2vw, 14px);
+    background: #07080a;
+    border: 1px solid #1b2027;
+    border-left: 3px solid #2a313b;
+    border-radius: 2px;
 }
-.stat-n { font-size: 32px; font-weight: 800; letter-spacing: -.03em; color: #e8edf7; }
-.stat-l {
-    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .11em; color: #7f8fae; margin-top: 3px; line-height: 1.35;
-}
-.n-red   { color: #ff5570; }
-.n-green { color: #10d98a; }
-.n-amber { color: #ffb020; }
 
-/* ---------- controls ---------- */
-.bar { display: flex; gap: 11px; flex-wrap: wrap; margin-top: 22px; }
+.stat-n {
+    font-size: clamp(20px, 2.4vw, 34px);
+    font-weight: 700;
+    line-height: 1.05;
+    color: #f4f6f8;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-l {
+    margin-top: 5px;
+    color: #6e7681;
+    font-size: clamp(8px, 0.74vw, 10px);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    line-height: 1.35;
+}
+
+.n-red   { color: #ff2f42; }
+.n-amber { color: #ffb023; }
+.n-green { color: #00e08a; }
+
+/* ============================ controls ================================== */
+
+.bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(8px, 1vw, 12px);
+    padding: clamp(16px, 2vw, 26px) 0 clamp(10px, 1.2vw, 16px);
+}
+
 .btn {
     font-family: inherit;
-    font-size: 15px; font-weight: 700; letter-spacing: .01em;
-    padding: 12px 20px; border-radius: 11px; cursor: pointer;
-    border: 1px solid #2b3a58; background: #16203a; color: #dbe4f5;
-    transition: transform .13s ease, background .18s ease, border-color .18s ease;
+    font-size: clamp(10px, 0.92vw, 13px);
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: clamp(9px, 1vw, 13px) clamp(12px, 1.5vw, 20px);
+    color: #c9ced6;
+    background: #12151a;
+    border: 1px solid #2a313b;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 140ms linear, border-color 140ms linear,
+                color 140ms linear, transform 90ms;
 }
-.btn:hover { background: #1e2b4c; border-color: #7c9cff; transform: translateY(-2px); }
-.btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
-.btn-attack  { background: #3a0d1c; border-color: #7d2038; color: #ff9fb0; }
-.btn-attack:hover  { background: #4d1226; border-color: #ff3355; }
-.btn-replay  { background: #3a2a06; border-color: #7d5f20; color: #ffd27a; }
-.btn-replay:hover  { background: #4d3808; border-color: #ffb020; }
-.btn-good    { background: #06301f; border-color: #17724c; color: #6ef7c0; }
-.btn-good:hover    { background: #084a2f; border-color: #10d98a; }
 
-.foot { margin-top: 22px; font-size: 12px; color: #55637f; }
-.live {
-    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-    background: #10d98a; margin-right: 7px; vertical-align: 1px;
-    animation: blink 1.4s ease-in-out infinite;
+.btn:hover  { background: #1a1f26; border-color: #3a434f; color: #f4f6f8; }
+.btn:active { transform: translateY(1px); }
+
+/* Visible keyboard focus — on stage the demo is driven from the keyboard. */
+.btn:focus-visible {
+    outline: 2px solid #00e08a;
+    outline-offset: 2px;
 }
-.badge-mock { color: #ffb020; }
+
+.btn-attack        { color: #ffb3bb; background: #2a060c; border-color: rgba(255, 47, 66, 0.42); }
+.btn-attack:hover  { background: #3d0910; border-color: #ff2f42; color: #fff; }
+
+.btn-replay        { color: #ffd9a0; background: #241a04; border-color: rgba(255, 176, 35, 0.42); }
+.btn-replay:hover  { background: #362605; border-color: #ffb023; color: #fff; }
+
+.btn-good          { color: #9df3cd; background: #04231a; border-color: rgba(0, 224, 138, 0.42); }
+.btn-good:hover    { background: #063122; border-color: #00e08a; color: #fff; }
+
+/* ============================ footer ==================================== */
+
+.foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(8px, 1.2vw, 18px);
+    padding-top: clamp(14px, 1.8vw, 22px);
+    margin-top: clamp(14px, 1.8vw, 22px);
+    border-top: 1px solid #1b2027;
+    color: #4e565f;
+    font-size: clamp(9px, 0.78vw, 11px);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.live {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #00e08a;
+}
+
+.live::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    background: #00e08a;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00e08a;
+    animation: ts-flicker 1.6s steps(2) infinite;
+}
+
+/* Disclosure chip. Honesty is a design element here, not fine print — the
+   pitch commits to disclosing scripted data unprompted, so the UI states it. */
+.badge-mock {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 9px;
+    color: #ffb023;
+    background: #241a04;
+    border: 1px solid rgba(255, 176, 35, 0.4);
+    border-radius: 2px;
+    letter-spacing: 0.12em;
+}
+
+/* ============================ responsive ================================ */
+
+@media (max-width: 900px) {
+    .cols    { grid-template-columns: 1fr; }
+    .verdict { flex-direction: column; gap: 10px; }
+    .gkind   { display: none; }
+}
+
+@media (max-width: 620px) {
+    .chain { flex-direction: column; align-items: stretch; }
+    .link  { flex: 0 0 14px; width: 2px; height: 14px; margin: 0 auto; }
+    .score { grid-template-columns: 1fr; }
+}
+
+/* ============================ a11y ====================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .gwrap, .gate, .verdict, .walker, .caret, .live::before {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+    }
+}
+
+/* A lit room washes out near-black on a projector. Lift the substrate without
+   abandoning the panel identity. */
+@media (prefers-contrast: more) {
+    body { background: #000; color: #e8ebef; }
+    .gate, .pane, .verdict { background: #0f1319; border-color: #333c47; }
+    .gname { color: #e8ebef; }
+    .tag, .stat-l, .gkind { color: #9aa3ad; }
+}

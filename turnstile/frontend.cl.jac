@@ -214,6 +214,23 @@ def:pub app -> JsxElement {
         return lambda { clearTimeout(t); };
     }, [tick, running]);
 
+    # Stage control from the keyboard. Reaching for a trackpad mid-pitch costs
+    # eye contact and looks like fumbling; 1-4 and R do not.
+    useEffect(lambda {
+        onkey = lambda (e: any) {
+            k = e.key;
+            if k == "1" { launch("attack"); }
+            elif k == "2" { launch("replay"); }
+            elif k == "3" { launch("legit"); }
+            elif k == "4" { launch("cap"); }
+            elif k == "r" or k == "R" {
+                started = False; running = False; tick = 0; history = [];
+            }
+        };
+        window.addEventListener("keydown", onkey);
+        return lambda { window.removeEventListener("keydown", onkey); };
+    }, []);
+
     s = scn();
     vclass = "verdict";
     if finished() {
@@ -232,9 +249,9 @@ def:pub app -> JsxElement {
                 every payment is a walker · authorization is a route it must survive
             </div>
 
-            <div className="chain">
+            <div className="chain" role="list" aria-label="authorization gate chain">
                 {[
-                    <div className="gwrap" key={i}>
+                    <div className="gwrap" key={i} role="listitem">
                         {i > 0 and <div className={
                             status(i) == "dead" and "link link-dead"
                             or (status(i - 1) == "pass" and "link link-on" or "link")
@@ -258,7 +275,7 @@ def:pub app -> JsxElement {
             </div>
 
             {finished() and
-                <div className={vclass}>
+                <div className={vclass} role="status" aria-live="polite">
                     <div className="v-word">{s["verdict"]}</div>
                     <div className="v-why">
                         {s["reason"]}
@@ -306,16 +323,21 @@ def:pub app -> JsxElement {
 
             <div className="bar">
                 <button className="btn btn-attack" onClick={lambda { launch("attack"); }}>
-                    Run attack · $340 gift card
+                    Run attack · gift card  [1]
                 </button>
                 <button className="btn btn-replay" onClick={lambda { launch("replay"); }}>
-                    Replay attack (precedent)
+                    Replay · precedent  [2]
                 </button>
                 <button className="btn btn-good" onClick={lambda { launch("legit"); }}>
-                    Legit · $62 groceries
+                    Legit · groceries  [3]
                 </button>
                 <button className="btn" onClick={lambda { launch("cap"); }}>
-                    $5,000 · cap breach
+                    Cap breach  [4]
+                </button>
+                <button className="btn" onClick={lambda {
+                    started = False; running = False; tick = 0; history = [];
+                }}>
+                    Reset  [R]
                 </button>
             </div>
 
