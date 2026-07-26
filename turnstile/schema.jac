@@ -128,6 +128,23 @@ walker Payment {
         visit [->:Enters:->];
     }
 
+    # UI contract. `gate_index` is AUTHORITATIVE and must be an int -- the
+    # frontend keys the red box off it, so renaming a gate can never break
+    # the visual. `halted_at` is a display string only.
+    # Order is fixed: 0 CapGate, 1 VelocityGate, 2 SanctionsGate,
+    #                 3 IntentMatchGate, 4 TribunalGate, 5 SettledGate.
+    # `Funds` is an EDGE, not a box in the row -- a payment killed there
+    # never reached gate 0, so it maps to -1 and the UI shows the kill
+    # upstream of the chain rather than inventing a box for it.
+    def gate_index() -> int {
+        order = ["CapGate", "VelocityGate", "SanctionsGate",
+                 "IntentMatchGate", "TribunalGate", "SettledGate"];
+        if self.halted_at in order {
+            return order.index(self.halted_at);
+        }
+        return -1;
+    }
+
     def outcome() -> dict {
         return {
             "payment_id": self.payment_id,
@@ -135,9 +152,12 @@ walker Payment {
             "merchant": self.merchant,
             "category": self.category,
             "verdict": self.verdict,
+            "gate_index": self.gate_index(),
             "halted_at": self.halted_at,
             "reason": self.reason,
+            "reasoning": "\n".join(self.signals),
             "signals": self.signals,
+            "tokens": self.tokens_used,
             "tokens_used": self.tokens_used,
             "cached": self.cached
         };
