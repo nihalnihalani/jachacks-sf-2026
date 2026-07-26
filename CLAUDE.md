@@ -24,9 +24,17 @@ python3 scripts/seed.py                   # regenerate synthetic graph + attack 
 - `TURNSTILE.md` — **product + demo source of truth.** Design disputes resolve here.
 - `README.md` — event rules, judging criteria, deadlines. `killBill/` + `Sentinel/` — prior-event reference projects (read-only).
 
-## Jac 0.34.5 — verified facts (do NOT rediscover these)
+## Jac 0.34.6 — verified facts (do NOT rediscover these)
+- **Version is 0.34.6**, and `jac` on this machine runs in **dev mode against the local compiler source** at `jac/jac/` (every invocation prints `🛠 jac dev mode`). If that repo is pulled or the demo runs on another machine, behavior changes. Re-verify on the demo machine.
 - **Import is `import from jaclang.byllm.lib { Model }`** — NOT `byllm.lib`. killBill targeted 0.15 and its `audit.jac:12` is stale. Iteration types: `import from jaclang.byllm.types { IterationAction, IterationContext }`.
 - **`jac run` requires a `jac.toml` in the directory.** `jac build` errors with "needs a project" without one.
+- **`disengage` is ONLY valid inside a walker ability** (`error[E2083]`). In a node ability it falls back to the server codespace and *appears* to work, because the block path and the no-visit path are observationally identical. Traversal control belongs in the walker.
+- **Node-type filter is `[-->][?:Type]`.** Backtick forms (`` (`?Type) ``) are gone in 0.34.6 — `error[E0105]: Unexpected character`.
+- **Typed-edge traversal is single-arrow**: `[->:Escalates:->]`, not `-->:Escalates:-->`.
+- **In a node ability, the type names the WALKER, not the node**: `can screen with Payment entry`.
+- **A walker subtype fires base-typed abilities** — `walker Payment(Metered)` runs `can meter with Metered entry`. This is how schema.jac's `Funds` edge meters a walker declared in gates.jac without an import cycle.
+- **LLM-guided traversal exists**: `visit [-->] by llm(intent="...", select=1)`. The model is shown each successor as an **(edge, node) pair** and picks the next hop; walker state and current node are injected automatically. Documented at `jac/docs/docs/reference/plugins/byllm.md:2558`. Almost nobody knows this exists — it makes routing itself a model decision.
+- **`jac create <name> --kind web-app`** works (~865ms, bun present). But there is **no `pages/` dir and no `JsxPage`** — the real API is `main.jac` with a `cl { }` codespace, `frontend.cl.jac` exporting `def:pub app -> JsxElement`, `endpoints.sv.jac` for server, and `[serve] base_route_app = "app"` in jac.toml. Copy the scaffold verbatim; do not write from a description.
 - **Plain `visit [-->]` crosses edges WITHOUT firing their abilities.** Only `visit [edge -->]` (or spawning on an edge) wakes them. Get this wrong and the `Funds` edge accounting silently no-ops — no error, just wrong numbers. Verified: `jac/docs/docs/reference/language/osp.md:215-222`.
 - **Node-level LLM methods compile**: `node G { def judge(c: dict) -> Ruling by llm(); }` — proven by compile spike, not assumed.
 - **Typed edge endpoints work**: `edge Funds: Treasury --> AgentIdentity { has cap: float; }` (`osp.md:248`).
@@ -45,13 +53,21 @@ obj Ruling { has blocked: bool, uncertain: bool, reason: str, confidence: float;
 ```
 Gate contract: on failure set `verdict`/`halted_at`/`reason` then `disengage`. On pass append to `signals` then `visit [-->]`. `halted_at` is the gate's node name and is the primary audit field — never leave it empty on a block.
 
+## Persistence laws (this is the #1 way the demo dies on stage)
+- **The seed MUST be idempotent.** `root` persists across runs, so an unguarded seed builds an Nth parallel gate chain on run N and the walker traverses *all* of them — every gate fires N times, the LLM gate costs N×, the scoreboard is nonsense. Guard: `existing = [root -->][?:CapGate]; if existing { ... return existing[0]; }`.
+- **Windowed counters must reset on reuse.** `VelocityGate.seen` is mutable state on a *persisted* node; it accumulated 3→6→9 across runs and blocked a payment that should pass. A new run is a new window. **This surfaced on run 3, never in dev** — which means on stage, not in rehearsal.
+- **Always verify with 4 consecutive runs**, not one. Both bugs above are invisible on run 1.
+- If you rename or move a node class, every persisted anchor of the old class quarantines noisily on startup (`Refused to deserialize unregistered class`). `demo.sh` must clear `.jac/data/` and re-seed; rehearse from that script.
+
 ## Design laws — non-negotiable
 - **The deterministic gate chain must run standalone with ZERO LLM calls.** Every agentic layer is additive. This is the demo-safety floor; if it ever needs a key to run, that's a bug.
 - **Convergence rule (from Sentinel):** escalate to `BLOCKED` only on **2+ independent corroborating signals**. A single signal returns `REVIEW`, never a block. One agent's opinion is not a verdict.
-- **Precedent is the zero-token fast path.** A fingerprint hit blocks without any LLM call. The demo's "it learned" moment is this, and it must be *measured* on stage (tokens + latency), never asserted.
+- **Count LLM CALLS, never tokens.** A token count returned inside an LLM-generated `Ruling` is a number the model invented. Report "LLM calls avoided" (an integer you can count) plus wall-clock latency.
+- **Precedent is the zero-call fast path.** A fingerprint hit blocks with no LLM call. The "it learned" moment must be *measured* on stage and shown as a persistent two-row ledger (first pass above, replay directly below) — a number that changes while you talk is missed by everyone.
 - **Attack #5 in the ladder must legitimately PASS.** A system that blocks everything proves nothing. Cutting the passing case destroys credibility.
 - **Deterministic where determinism belongs** (killBill's real lesson): cap/velocity/sanctions are arithmetic. Do not spend tokens on comparisons.
-- **The graph must be load-bearing.** killBill's graph was write-only — nothing ever traversed it. If you could delete the graph and keep the demo, the thesis is dead. Traversal *is* the algorithm here; keep it that way.
+- **The graph must be load-bearing — and the gate chain does NOT prove it.** A linear 5-gate chain is a `for` loop in a costume; 5 of 7 subsystems survive replacing the graph with a list. Only two are genuinely graph-shaped: **`trace_provenance`** (unbounded reachability from a charge back to a live principal) and **revocation blast radius** (delete one edge, which set goes dark). Both are ~20 lines each and are **NEVER-CUT**. Lead the demo with *"legal at every hop, authority broken two hops upstream"* — not "watch it travel the gates".
+- **Say six load-bearing constructs, not twelve.** A judge who probes six and finds six real is worth far more than one who probes twelve and finds the third is a config flag.
 
 ## Honesty rules (judges include people who built these tools)
 - Never state a latency, token count, or block rate that wasn't measured in this repo on this machine.

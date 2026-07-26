@@ -8,6 +8,23 @@ Asserts that each payment halts at the gate that should have caught it.
 include gates;
 
 def build_chain() -> CapGate {
+    # IDEMPOTENT SEED GUARD -- non-negotiable.
+    # `root` persists across runs. Without this guard, run N builds an Nth
+    # parallel gate chain and the walker traverses ALL of them: every gate
+    # fires N times, the LLM gate costs N x, the scoreboard is nonsense.
+    # It only manifests on run 2+, i.e. during rehearsal and on stage.
+    existing = [root -->][?:CapGate];
+    if existing {
+        cap = existing[0];
+        # The chain persists, but WINDOWED COUNTERS must not. `seen` is
+        # mutable node state living on a persisted node, so without this it
+        # accumulates across runs (3 -> 6 -> 9) and eventually blocks a
+        # payment that should pass. Surfaced on run 3, never in dev.
+        # A new run is a new velocity window.
+        for v in [cap -->][?:VelocityGate] { v.seen = 0; }
+        return cap;
+    }
+
     cap  = CapGate(label="CapGate", limit=500.0);
     vel  = VelocityGate(label="VelocityGate", max_in_window=8);
     sanc = SanctionsGate(label="SanctionsGate", blocklist=["Nordkraft Holdings", "Volga Trade LLC"]);

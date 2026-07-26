@@ -2,12 +2,16 @@
 
 The payment IS the walker. Authorization is a route it must survive.
 
-Design note (learned the hard way -- see CLAUDE.md): `disengage` is only
-valid inside a WALKER ability (error[E2083]). So the walker owns traversal
-control, and each Gate subtype owns its own `judge()`. The gate still
-reasons about itself -- polymorphic dispatch on `here` -- but there is
-exactly one place where a payment can die, which is also exactly one place
-to instrument.
+Design notes (learned the hard way -- see CLAUDE.md):
+  * `disengage` is only valid inside a WALKER ability (error[E2083]). So the
+    walker owns traversal control and each gate owns its own `judge()`. The
+    gate still reasons about itself -- polymorphic dispatch on `here` -- but
+    there is exactly one place a payment can die, which is also exactly one
+    place to instrument.
+  * schema.jac owns `node Gate` as pure DATA. Behavior lives here, on
+    `ScreenGate(Gate)`, so the two files never fight over a declaration.
+  * We count LLM CALLS, never tokens. A token count coming back inside an
+    LLM-generated `Ruling` would be a number the model invented.
 
 This module runs standalone with ZERO LLM calls. That is the demo-safety
 floor: the deterministic layer is a complete product on its own, and every
@@ -16,17 +20,15 @@ agentic layer is additive.
 
 include schema;
 
-# -------------------- gate hierarchy --------------------
+# -------------------- behavioral gate base --------------------
 
-node Gate {
-    has label: str = "Gate";
-
+node ScreenGate(Gate) {
     def judge(amount: float, merchant: str, category: str) -> Ruling {
         return Ruling(blocked=False);
     }
 }
 
-node CapGate(Gate) {
+node CapGate(ScreenGate) {
     has limit: float = 500.0;
 
     def judge(amount: float, merchant: str, category: str) -> Ruling {
@@ -38,8 +40,8 @@ node CapGate(Gate) {
     }
 }
 
-node VelocityGate(Gate) {
-    has max_in_window: int = 3,
+node VelocityGate(ScreenGate) {
+    has max_in_window: int = 8,
         seen: int = 0;
 
     def judge(amount: float, merchant: str, category: str) -> Ruling {
@@ -52,7 +54,7 @@ node VelocityGate(Gate) {
     }
 }
 
-node SanctionsGate(Gate) {
+node SanctionsGate(ScreenGate) {
     has blocklist: list[str] = [];
 
     def judge(amount: float, merchant: str, category: str) -> Ruling {
@@ -66,12 +68,14 @@ node SanctionsGate(Gate) {
     }
 }
 
-node IntentMatchGate(Gate) {
+node IntentMatchGate(ScreenGate) {
     has mandate_text: str = "",
         allowed_categories: list[str] = [];
 
-    # Seam for the real `by llm()` judgment -- tribunal.jac overrides this.
-    # The deterministic stand-in keeps smoke fast, free and repeatable.
+    # Seam for the real `by llm()` judgment. tribunal.jac subtypes this and
+    # overrides `judge` -- note it takes NO mandate parameter, because the
+    # LLM form reads `self.mandate_text` off the node. That is what makes the
+    # node-level `by llm()` load-bearing instead of decorative.
     def judge(amount: float, merchant: str, category: str) -> Ruling {
         if self.allowed_categories and category not in self.allowed_categories {
             return Ruling(blocked=True, confidence=0.9,
@@ -81,25 +85,20 @@ node IntentMatchGate(Gate) {
     }
 }
 
-node Settled(Gate) {}
+node Settled(ScreenGate) {}
 
 # -------------------- the walker --------------------
 
-walker Payment {
+walker Payment(Metered) {
     has payment_id: str = "",
-        amount: float = 0.0,
         cart: dict = {},
         merchant: str = "",
         category: str = "",
         agent_handle: str = "",
-        verdict: str = "OK",
-        halted_at: str = "",
-        reason: str = "",
-        signals: list[str] = [],
-        tokens_used: int = 0;
+        llm_calls: int = 0;
 
     # One control site: every payment that dies, dies here.
-    can screen with Gate entry {
+    can screen with ScreenGate entry {
         if isinstance(here, Settled) {
             self.verdict = "ALLOWED";
             self.halted_at = here.label;
@@ -107,14 +106,11 @@ walker Payment {
             disengage;
         }
         r = here.judge(self.amount, self.merchant, self.category);
-        self.tokens_used += r.tokens;
         if r.blocked {
-            self.verdict = "BLOCKED";
-            self.halted_at = here.label;
-            self.reason = r.reason;
+            self.block(here.label, r.reason);
             disengage;
         }
-        self.signals.append(f"{here.label}:ok");
+        self.pass_gate(f"{here.label}:ok");
         visit [-->];
     }
 }
