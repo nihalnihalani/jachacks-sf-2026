@@ -1,0 +1,39 @@
+[submodule "Jac docs/upstream/jac"]
+	path = Jac docs/upstream/jac
+	url = https://github.com/jaseci-labs/jac.git
+[submodule "Jac docs/upstream/jac-client-examples"]
+	path = Jac docs/upstream/jac-client-examples
+	url = https://github.com/jaseci-labs/jac-client-examples.git
+[submodule "Jac docs/upstream/jac-client-playground"]
+	path = Jac docs/upstream/jac-client-playground
+	url = https://github.com/jaseci-labs/jac-client-playground.git
+[submodule "Jac docs/upstream/jac-client-templates"]
+	path = Jac docs/upstream/jac-client-templates
+	url = https://github.com/jaseci-labs/jac-client-templates.git
+[submodule "Jac docs/upstream/jac-mcp-playground"]
+	path = Jac docs/upstream/jac-mcp-playground
+	url = https://github.com/jaseci-labs/jac-mcp-playground.git
+[submodule "Jac docs/upstream/jac-shadcn"]
+	path = Jac docs/upstream/jac-shadcn
+	url = https://github.com/jaseci-labs/jac-shadcn.git
+[submodule "Jac docs/upstream/jac-vscode"]
+	path = Jac docs/upstream/jac-vscode
+	url = https://github.com/jaseci-labs/jac-vscode.git
+[submodule "Jac docs/upstream/jac_site"]
+	path = Jac docs/upstream/jac_site
+	url = https://github.com/jaseci-labs/jac_site.git
+[submodule "Jac docs/upstream/jacpacks"]
+	path = Jac docs/upstream/jacpacks
+	url = https://github.com/jaseci-labs/jacpacks.git
+[submodule "Jac docs/upstream/jaseci-llmdocs"]
+	path = Jac docs/upstream/jaseci-llmdocs
+	url = https://github.com/jaseci-labs/jaseci-llmdocs.git
+[submodule "Jac docs/upstream/the-jac-workshop"]
+	path = Jac docs/upstream/the-jac-workshop
+	url = https://github.com/jaseci-labs/the-jac-workshop.git
+[submodule "Jac docs/upstream/this_is_jac"]
+	path = Jac docs/upstream/this_is_jac
+	url = https://github.com/jaseci-labs/this_is_jac.git
+[submodule "Jac docs/upstream/tree-sitter-jac"]
+	path = Jac docs/upstream/tree-sitter-jac
+	url = https://github.com/jaseci-labs/tree-sitter-jac.git

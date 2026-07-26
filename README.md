@@ -15,6 +15,19 @@ Built at **JacHacks San Francisco 2026** using Jac and byLLM.
 - [Comprehensive product plan](PRODUCT_PLAN.md) — product strategy, Jac-native architecture, requirements, and validation.
 - [Original technical design](SpendOS.md) — the Jac-native authorization architecture.
 
+## Jac reference corpus
+
+The [`Jac docs`](Jac%20docs/README.md) folder is a self-contained reference
+library for developers and LLM coding agents. It includes curated setup and
+language guidance, runnable examples, papers, and pinned official Jac source
+repositories.
+
+Clone the complete corpus, including its pinned upstream repositories, with:
+
+```bash
+git clone --recurse-submodules https://github.com/nihalnihalani/jachacks-sf-2026.git
+```
+
 ---
 
 ## Hackathon context

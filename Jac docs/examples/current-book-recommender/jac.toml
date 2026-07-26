@@ -1,0 +1,11 @@
+[project]
+name = "current-book-recommender"
+version = "0.1.0"
+entry-point = "main.jac"
+
+[byllm.model]
+default_model = "gpt-4o-mini"
+
+[byllm.call_params]
+temperature = 0.1
+max_tokens = 300
