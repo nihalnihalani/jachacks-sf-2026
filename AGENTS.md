@@ -20,6 +20,24 @@ and workflows. Keep the graph load-bearing, use typed byLLM outputs with `sem`
 annotations, and enforce financial calculations and authorization
 deterministically.
 
+## Jac development
+
+Jac changes must use the installed compiler and its version-matched guidance.
+
+1. Run `jac --version`.
+2. Load `jac-core-cheatsheet` plus every relevant `jac-*` skill. Start with
+   `jac-project-kinds` when choosing architecture.
+3. Use `jac guide --search <topic>` when the installed skills do not answer a
+   syntax or compiler question.
+4. Use the `jac` MCP tools for documentation, validation, formatting, linting,
+   execution, and transpilation.
+5. Before completion run `jac check`, `jac check --lint`, `jac fmt`, and
+   `jac test` as applicable.
+
+Do not invent Jac syntax, substitute Python or JSX conventions, or rely on
+guidance from a different Jac version. Refresh Codex's skills after upgrading
+Jac with `jac guide --export ~/.codex/skills`.
+
 ## 21st.dev UI workflows
 
 Before substantial UI work, read the project's existing components, tokens,

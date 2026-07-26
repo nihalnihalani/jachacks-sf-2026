@@ -9,6 +9,12 @@ authorization system remains the foundation for controlled agent spending.
 
 Built at **JacHacks San Francisco 2026** using Jac and byLLM.
 
+## Agent Jac tooling
+
+The shared [Jac Codex setup](docs/jac-codex.md) connects the compiler through
+MCP and exports its version-matched guides as Codex skills. Run
+`./scripts/setup-jac-codex.sh` once, then restart Codex.
+
 ## Agent UI tooling
 
 The repository includes shared [21st.dev agent setup](docs/21st.md) for
