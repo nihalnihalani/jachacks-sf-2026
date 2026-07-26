@@ -9,6 +9,13 @@ authorization system remains the foundation for controlled agent spending.
 
 Built at **JacHacks San Francisco 2026** using Jac and byLLM.
 
+## Agent UI tooling
+
+The repository includes shared [21st.dev agent setup](docs/21st.md) for
+exploring, building, reviewing, and publishing UI consistently across the
+team. Run `./scripts/setup-21st.sh` once after exporting `API_KEY_21ST`; never
+commit the real key.
+
 ## Plans
 
 - [Simple implementation plan](SIMPLE_PLAN.md) — build one working Subscription Guardian loop.
