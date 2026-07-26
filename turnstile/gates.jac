@@ -15,6 +15,7 @@
 #                    \--Escalates--> TribunalGate --Next--> SettledGate
 # =============================================================
 
+import from tribunal { judge_intent }
 import from schema {
     Ruling, Principal, AgentIdentity, Treasury, Merchant, Mandate,
     Precedent, CaseFile, Gate, Payment,
@@ -113,8 +114,28 @@ node IntentMatchGate(Gate) {
     #   mandate. Set blocked=True only for a clear violation; set
     #   uncertain=True when the cart is plausible but not covered.""";
     # ---------------------------------------------------------
+    # WIRED. The `by llm()` decl lives in tribunal.jac, NOT here, for two
+    # verified reasons:
+    #   * a node-level `by llm()` on a node whose base archetype is IMPORTED
+    #     crashes the compiler (ClassInfo.__init__ missing kwargs). Every gate
+    #     here inherits the imported `Gate`, so hosting the decl on the node is
+    #     not an option.
+    #   * keeping gates.jac free of `by llm()` is what preserves the zero-key
+    #     demo-safety floor -- this file cannot accidentally reach a model.
+    # judge_intent degrades on its own (no key -> rules, exception -> rules)
+    # and returns tokens=0 on the deterministic path, so `use_llm` stays a
+    # pure seed-time switch.
     def judge(cart: dict, mandate: str) -> Ruling {
-        return self.judge_offline(cart, mandate);
+        if not self.use_llm {
+            return self.judge_offline(cart, mandate);
+        }
+        amt = 0.0;
+        if "total" in cart { amt = float(cart["total"]); }
+        mer = "";
+        if "merchant" in cart { mer = str(cart["merchant"]); }
+        cat = "";
+        if "category" in cart { cat = str(cart["category"]); }
+        return judge_intent(mandate, self.allowed, amt, mer, cat, cart);
     }
 
     # Deterministic placeholder. Category-based, zero tokens, and the
