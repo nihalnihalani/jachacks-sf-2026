@@ -1,139 +1,179 @@
-<h1 align="center">SpendOS</h1>
+# SpendOS — Agentic Financial Guardian
 
-<p align="center"><strong>An authorization firewall for AI agents that spend money.</strong></p>
-<p align="center"><em>Every payment is a walker. Authorization is a route it must survive.</em></p>
+SpendOS imports a bank-statement CSV, detects recurring charges, investigates
+subscriptions from graph evidence, remembers user decisions, and simulates an
+approved cancellation. Its minimal Budget Guard reserves confirmed fixed
+obligations, detected subscriptions, and a user-defined safety reserve to
+calculate one deterministic Safe to Spend value. Its Purchase Guard also lets
+AI agents submit purchase proposals for deterministic budget preflight, while
+keeping approval and simulated execution under explicit human control.
 
-<p align="center">
-  <strong>Track:</strong> Agentic AI ·
-  <strong>Built at:</strong> JacHacks SF 2026 ·
-  <strong>Stack:</strong> Jac native binary + built-in byLLM
-</p>
+The current release deliberately stops before real financial execution. Its
+Live Feed is a deterministic, always-on-style simulation for testing the
+guardian loop. It does not connect to a bank, cancel a real subscription, move
+money, or claim that a real account is being monitored.
 
----
+A new agentic Purchase Layer (V7, see `../CLAUDE_CODE_TASK.md`) is being built
+one gate at a time on top of this. Milestone 7.0 is live: a one-line request
+("buy 1 kg potato, onion, and tomato from Instacart") resolves against a live
+store catalog, builds a cart, and produces a `SIMULATED` order recorded to
+audit history — with no budget, recurring, limit, pattern, fraud, or preference
+gates wired in yet, and `checkout_and_pay` not implemented.
 
-## The problem
+## Run it
 
-AI agents now hold spending authority. Every guardrail shipping today is a flat rule list — daily cap, per-transaction cap, merchant allowlist. Those catch a runaway loop burning $10,000. They do **not** catch a $180 charge from an allowlisted merchant that the human never wanted, which is the shape a prompt-injected agent produces: clean, fast, successful, and completely unauthorized.
-
-The missing check is semantic: *does the cart the agent assembled match the intent the human signed?* That's a judgment, not a threshold.
-
-## How it works
-
-A payment enters as a Jac **walker** and travels a chain of **gate nodes**. Pass a gate, move on. Fail one, and `disengage` fires — the payment dies at the gate that killed it, and **that node is the audit record**.
-
-```
-Treasury --Funds(edge)--> Agent --> CapGate --> VelocityGate --> SanctionsGate
-        --> IntentMatchGate --Next--> Settled
-                           \--Escalates--> TribunalGate
-```
-
-Seven halt locations, all asserted in `smoke.jac`:
-
-| Payment | Verdict | Dies at | Why |
-|---|---|---|---|
-| $340 grocery | BLOCKED | `CapGate` | arithmetic |
-| $75 Nordvik Trading OOO | BLOCKED | `SanctionsGate` | real OFAC SDN hit |
-| $180 gift card | BLOCKED | `TribunalGate` | 2 corroborating signals |
-| $60 electronics | **REVIEW** | `TribunalGate` | 1 signal — never a block |
-| 3×$150 then $100 | BLOCKED | **`Funds` — an edge** | cumulative spend |
-| 7th in window | BLOCKED | `VelocityGate` | burst limit |
-| $45 grocery | SETTLED | `SettledGate` | clean pass |
-
-## Quick start
+Requires the native Jac 0.34.7 binary:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jaseci-labs/jaseci/main/scripts/install.sh | bash
-cd spendos
-jac install --plan
 jac install
-jac precommit
+jac clean --data --force
 jac test
-./demo.sh              # clean slate, assert 9/9, start the UI
-./demo.sh --check      # verify only — run this before you present
+jac build
+jac start --dev --port 8011
 ```
 
-Manually:
+Open <http://localhost:8011> and choose **Watch the live demo** to stream the
+bundled 55-transaction synthetic bank feed through SpendOS in small batches.
+Each batch is imported into the Jac graph, followed immediately by recurrence
+and budget analysis.
+
+You can also upload a CSV with these required columns:
+
+```text
+date,description,amount
+```
+
+For a bank-like activity view, the importer also accepts:
+
+```text
+merchant,category,subcategory,account_name,account_mask,transaction_type,
+payment_channel,city,region,country,pending
+```
+
+Charges are negative and income/refunds are positive. Supported dates are
+`YYYY-MM-DD`, `MM/DD/YYYY`, and `MM/DD/YY`. Extra columns are preserved on
+transaction nodes and shown in the Live Feed UI.
+
+## Working product loop
+
+```text
+preview
+→ import
+→ detect
+→ continuously refresh the dashboard
+→ investigate
+→ decide
+→ approve
+→ simulate
+→ remember
+→ confirm budget guardrails
+→ preflight an agent purchase
+→ approve or reject
+→ simulate
+```
+
+- Parsing, fingerprints, totals, recurrence detection, confidence, next-charge
+  estimates, price changes, and savings are deterministic.
+- Statements, transactions, merchants, subscriptions, evidence, cases,
+  preferences, precedents, decisions, and simulated actions persist in the Jac
+  graph.
+- Import, analysis, investigation, decisions, and simulation are idempotent.
+- The synthetic feed imports five transactions per tick, re-runs deterministic
+  analysis after every batch, exposes pause/restart controls, and reads its
+  detailed activity back from the persisted graph.
+- Without an API key, findings are honestly labeled `deterministic`.
+- With a supported provider key, `assess_subscription` uses five typed tools.
+  Jac validates its evidence citations and applies deterministic safety rules.
+- Cancellation always ends at `SIMULATED` with the disclosure:
+  **No external action was performed.**
+- Budget inputs persist in one idempotently updated `BudgetPlan` node. Safe to
+  Spend is always recalculated from the current active-subscription graph.
+- Purchase proposals persist with their agent identity, purpose, cadence,
+  monthly impact, policy outcome, reasoning, projected Safe to Spend, and
+  lifecycle state.
+- `SAFE` is never permission. `WARN` requires explicit review, `BLOCK` cannot
+  be overridden, and approved proposals still end at `SIMULATED`.
+
+## Architecture
+
+| File | Responsibility |
+| --- | --- |
+| `schema.jac` | Typed objects, graph nodes and edges, CSV parser, recurrence math |
+| `agent.jac` | Typed byLLM assessment and five evidence tools |
+| `purchase.jac` | Purchase-layer (V7) domain model: catalog search, cart/order math, instruction parsing — no gates yet (7.0) |
+| `endpoints.sv.jac` | Graph workflows and client-facing endpoints |
+| `frontend.cl.jac` | Complete responsive client written in Jac |
+| `main.jac` | Full-stack entry and endpoint registration |
+| `tests/core_tests.jac` | Deterministic, idempotency, and simulation tests |
+| `tests/purchase_tests.jac` | Purchase-layer 7.0 tests: parsing, catalog resolution, cart/order totals, out-of-stock and unresolved-item handling, audit |
+| `data/sample_statement.csv` | Safe demo statement with one rejected row |
+| `data/synthetic_bank_feed.csv` | Detailed two-account, three-month live-feed fixture |
+| `data/catalog.csv` | Live store catalog fixture used by `resolve_products` |
+| `hermes/` | Constrained MCP bridge and Hermes financial-guardian skill |
+
+The graph is the only persisted application state. Functions own pure parsing
+and math. Walkers own graph traversal and mutation. The client calls the server
+through Jac’s generated codespace boundary; there is no Express server or
+handwritten REST client.
+
+## Agent safety
+
+The optional live assessment can return only `KEEP`, `REVIEW`, `DOWNGRADE`, or
+`CANCEL`. It receives graph-derived evidence and may use:
+
+1. charge history;
+2. price changes;
+3. user preferences;
+4. prior precedent; and
+5. portfolio overlap.
+
+Unsupported citations become `REVIEW`. Low-confidence results become
+`REVIEW`. Protected subscriptions remain `KEEP`. The model cannot approve or
+execute an action, and it never owns financial arithmetic.
+
+## Hermes Agent
+
+SpendOS exposes a narrow nine-tool MCP adapter for Hermes. Five tools cover
+financial snapshot and purchase-proposal preflight. Four additional tools form
+a two-way research loop: SpendOS dispatches a shopping mission, Hermes claims
+it, returns evidence-backed candidates, and marks the mission ready for human
+review. It deliberately exposes no approve, checkout, purchase, cancellation,
+transfer, bank-login, or merchant-contact tool.
+
+Run the bridge beside SpendOS:
+
 ```bash
-jac run smoke.jac      # 9 payments, 0 tokens, no API key required
-jac start --dev        # UI + API with hot reload
+SPENDOS_API_URL=http://127.0.0.1:8012 \
+  python3 hermes/mcp_http_server.py --host 0.0.0.0 --port 8765
 ```
 
-Before changing Jac code, use the version-matched reference bundled with the
-compiler:
+For Docker Hermes, register
+`http://host.docker.internal:8765/mcp`. See
+[`hermes/README.md`](hermes/README.md) for the complete local setup and safety
+boundary.
+
+## Verification
 
 ```bash
-jac guide --search walker
-jac guide jac-by-llm
-jac mcp --inspect
+jac check .
+jac check --lint .
+jac test
+jac build
 ```
 
-Optional — set **one** key in `.env` to enable the LLM intent gate:
-```bash
-cp .env.example .env   # OPENAI_API_KEY | ANTHROPIC_API_KEY | GEMINI_API_KEY
-```
-**No key is a fully supported mode.** The gate chain runs identically without one.
+The test suite covers merchant normalization, detailed bank-field parsing,
+malformed-row reporting, deterministic recurrence detection, duplicate-free
+reimport, idempotent cancellation simulation, Safe to Spend arithmetic,
+unsafe-plan warnings, idempotent budget updates, purchase-policy thresholds,
+approval restrictions, proposal reevaluation, and simulation.
 
-## Why this is a graph, honestly
+## Current limitations
 
-A linear gate chain is a `for` loop in a costume, and we won't pretend otherwise. The graph earns its place in exactly two places — and both are load-bearing:
-
-- **`Funds` is an edge that meters its own spend.** Three legs settle legitimately; the fourth dies at the edge on cumulative spend no single transaction can see. **Per-transaction reasoning structurally cannot catch structuring.**
-- **`trace_provenance` walks the delegation chain backward** from a charge to a live human principal. A byLLM tool spawns that walker *mid-traversal*. Reachability is not a table scan.
-
-The three arithmetic gates are arithmetic. We label them as such.
-
-## Jac constructs used
-
-Six load-bearing ones — deliberately not twelve, because these survive being probed:
-
-1. **Walkers as the execution model** — a payment *is* a walker
-2. **`disengage`** — the halting node is the audit record
-3. **Edge abilities** via `visit [edge ->:Funds:->]` — the edge is the accountant
-4. **`by llm(tools=[...])`** ReAct — the Tribunal plans which specialists to consult
-5. **A byLLM tool that spawns a walker** — `trace_provenance`
-6. **The frontend is Jac** — `.cl.jac` → React, `root spawn` crosses `cl → sv` with no fetch, no REST client, no Express
-
-Plus `on_iteration` budget hooks, `ModelPool` fallback, typed edge endpoints, and `root` persistence for precedent memory.
-
-**The convergence rule is enforced in Jac, not in the prompt:** BLOCK requires 2+ *independent* adverse sources; one signal is always REVIEW; a model that says "block" with no evidence is downgraded. It holds even when the model ignores its instructions.
-
-## Layered degradation
-
-| Layer | Condition | Behavior |
-|---|---|---|
-| 1 | API key present | LLM intent gate + ReAct tribunal |
-| 2 | no key / API down | deterministic gates — **a complete demo** |
-| 3 | backend down | UI falls back to `web/demo_case.json` |
-
-Measured in all three states: same verdict, same three corroborating signals. `SPENDOS_FORCE_DETERMINISTIC=1` is the panic switch.
-
-## Project layout
-
-```
-schema.jac        nodes, typed edges, the self-metering Funds edge
-gates.jac         gate chain + Payment walker + disengage
-tribunal.jac      by llm(tools=[...]) adjudicator, convergence rule, budget hook
-probe.jac         adversarial red-team agent (conversation= memory)
-endpoints.sv.jac  ScreenPayment / ResetDemo — what the client spawns
-frontend.cl.jac   the UI, in Jac
-smoke.jac         9 asserted verdicts, fails if a token is ever spent
-seed.py           synthetic graph + attack corpus + OFAC cache (stdlib only)
-demo.sh           clean-start runbook — always rehearse from this
-```
-
-## What's honest about this
-
-- **Seed data is synthetic.** Principals, agents, mandates and merchants are generated.
-- **The OFAC list is real** — 19,218 records from treasury.gov, sha256-verified against the server's own `Digest` header, committed. Network is touched only under `--refresh-ofac`.
-- **Numbers are produced live**, not replayed from a pre-computed file.
-- **We have not tested an attack we didn't anticipate.** The claim is the architecture, not a detection rate.
-
-## Not production
-
-This is a one-day hackathon build. It has **no authentication, no rate limiting, no multi-tenancy, no key management, no adversarial security review, and no load testing.** Settlement is simulated — no real funds move. `walker:pub` endpoints are unauthenticated by design so the demo needs no login.
-
-What it *does* have: a deterministic layer that runs with no credentials, an assertion suite that fails on verdict drift or an unexpected token spend, layered degradation measured in three states, and a runbook that starts from a clean graph.
-
-## License
-
-MIT — built for JacHacks SF 2026. Synthetic data only.
+- Demo endpoints are public and use the shared guest graph.
+- There is no authentication or multi-user isolation yet.
+- CSV bank metadata is optional and no automatic bank-format mapper exists yet.
+- Currency is selected by the caller and not inferred.
+- The deterministic agent can identify overlapping services, but it does not
+  infer whether the user uses them.
+- Real cancellation and connected bank monitoring remain outside the safety
+  boundary.

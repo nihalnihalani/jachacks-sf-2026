@@ -1,5 +1,35 @@
 # SpendOS Simple Build Plan
 
+## Implementation status
+
+The first Subscription Guardian release described below is implemented in
+`spendos/`:
+
+- current Jac 0.34.7 project checks, tests, and build pass;
+- three-column CSV preview and idempotent graph import work;
+- monthly, quarterly, and annual recurrence detection is deterministic;
+- subscription totals, expected charges, confidence, and price changes render
+  from the graph;
+- optional byLLM investigation uses five typed evidence tools;
+- no-key investigations are honest and deterministic;
+- decisions persist preferences and precedent;
+- approved cancellation follows `PROPOSED → APPROVED → SIMULATED`; and
+- Budget Guard calculates deterministic Safe to Spend from confirmed inputs;
+- Purchase Guard records agent proposals and returns `SAFE`, `WARN`, `BLOCK`,
+  or `REVIEW`;
+- safe proposals require human approval, warnings cannot self-approve, blocks
+  cannot be overridden, and execution remains simulated;
+- Hermes connects through a nine-tool MCP allowlist with no approval or
+  financial-execution capability;
+- SpendOS can dispatch a durable shopping mission, Hermes can claim it and
+  return structured candidates, and SpendOS independently checks budget and
+  recurring-cost violations; and
+- the UI always states that no external action was performed.
+
+The stop line remains active: connected accounts, real cancellation,
+notifications, and autonomous financial execution are not part of this
+release.
+
 ## Product to build now
 
 Build one working feature:
@@ -209,8 +239,8 @@ Run it three consecutive times.
 
 ## Stop line
 
-Do not begin budgeting, Plaid, notifications, real cancellation, shopping,
-multiple visible agents, or a large dashboard before Iteration 5 is reliable.
+Do not begin Plaid, notifications, real cancellation, real checkout, multiple
+visible agents, or a large dashboard before Iteration 5 is reliable.
 
 ## Next capability after the stop line
 
@@ -222,6 +252,23 @@ Add a minimal Budget Guard:
 - warn when a new subscription makes the plan unsafe.
 
 Only after that should SpendOS add connected monitoring and real actions.
+
+### Budget Guard implementation status
+
+The first post-stop-line vertical slice is now implemented:
+
+- the user confirms monthly take-home income, fixed obligations, and a safety
+  reserve;
+- SpendOS reserves the recurring subscription total already proven by the
+  graph;
+- `Safe to Spend = income - fixed obligations - subscriptions - reserve`;
+- one `BudgetPlan` node is updated idempotently instead of creating snapshots;
+- unsafe plans show an explicit deterministic warning; and
+- the UI states that SpendOS does not move money.
+
+The next small capability should warn before a proposed new subscription is
+approved. Connected accounts, arbitrary category budgeting, and autonomous
+spending remain out of scope.
 
 ## Immediate execution order
 

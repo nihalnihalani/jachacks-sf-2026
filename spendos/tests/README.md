@@ -1,17 +1,12 @@
-# SpendOS Jac tests
+# SpendOS tests
 
-Place server-side Jac tests in this directory using descriptive names such as:
-
-- `import_tests.jac`
-- `subscription_tests.jac`
-- `precedent_tests.jac`
-- `edge_ability_compat_tests.jac`
-
-Run the suite from `spendos/`:
+The Jac suite covers the product's deterministic and graph-persistence
+contracts. Run it from `spendos/`:
 
 ```bash
+jac clean --data --force
 jac test
 ```
 
-Avoid `test_*.jac` names for server-side tests because they can conflict with
-Python module discovery in the current Jac runtime.
+Files deliberately use the `*_tests.jac` naming convention because
+`test_*.jac` conflicts with Jac's server-side test discovery.

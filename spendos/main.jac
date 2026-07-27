@@ -1,14 +1,38 @@
-"""SpendOS — full-stack entry point.
+"""SpendOS full-stack entry point."""
 
-The client half. Deliberately decoupled from `schema.jac` / `gates.jac` for
-now: the UI runs off its scripted mock path so the frontend can never be
-broken by an in-flight backend edit. Wiring the real walkers is a one-line
-change in `frontend.impl.jac` — see the note there.
-"""
-
-# Importing the walker here MOUNTS it on the web-app server and makes it
-# reachable from the client codespace via `sv import`.
-import from endpoints { ScreenPayment, ResetDemo }
+import from endpoints {
+    AnalyzePortfolio,
+    BudgetView,
+    Decision,
+    DecideCase,
+    ImportStatement,
+    InvestigateSubscription,
+    SimulatedAction,
+    SimulateCancellation,
+    PurchaseProposalView,
+    ShoppingCandidateView,
+    ShoppingCandidateInput,
+    ShoppingMissionView,
+    SubscriptionCase,
+    add_to_cart,
+    decide_purchase_proposal,
+    claim_shopping_mission,
+    complete_shopping_mission,
+    create_shopping_mission,
+    get_dashboard,
+    get_synthetic_feed,
+    place_purchase,
+    preview_statement,
+    propose_purchase,
+    record_audit,
+    reset_demo_data,
+    resolve_products,
+    save_budget_plan,
+    simulate_order,
+    simulate_purchase,
+    submit_shopping_candidate,
+    view_cart,
+}
 
 cl {
     import from .frontend { app as SpendOSApp }

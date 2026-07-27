@@ -1,0 +1,56 @@
+date,description,amount,merchant,category,subcategory,account_name,account_mask,transaction_type,payment_channel,city,region,country,pending
+2026-05-01,ACME PAYROLL DIRECT DEP,6425.00,Acme Corporation,Income,Payroll,Everyday Checking,4821,CREDIT,ach,San Francisco,CA,US,false
+2026-05-02,CRYSTAL SPRINGS APARTMENTS,-2850.00,Crystal Springs Apartments,Housing,Rent,Everyday Checking,4821,DEBIT,ach,San Francisco,CA,US,false
+2026-05-03,NETFLIX.COM 408724,-22.99,Netflix,Entertainment,Streaming,Rewards Card,1944,DEBIT,online,Los Gatos,CA,US,false
+2026-05-04,SAFEWAY STORE 1490,-126.42,Safeway,Food and Drink,Groceries,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-05-05,PG AND E WEB PAYMENT,-148.21,Pacific Gas and Electric,Utilities,Electricity,Everyday Checking,4821,DEBIT,online,San Francisco,CA,US,false
+2026-05-06,SPOTIFY USA,-11.99,Spotify,Entertainment,Music,Rewards Card,1944,DEBIT,online,New York,NY,US,false
+2026-05-07,BLUE BOTTLE COFFEE,-8.75,Blue Bottle Coffee,Food and Drink,Coffee,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-05-08,ADOBE CREATIVE CLOUD,-59.99,Adobe,Software,Creative Tools,Rewards Card,1944,DEBIT,online,San Jose,CA,US,false
+2026-05-09,UBER TRIP HELP.UBER.COM,-24.68,Uber,Transportation,Rideshare,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-05-10,APPLE.COM BILL ICLOUD,-9.99,Apple iCloud,Software,Cloud Storage,Rewards Card,1944,DEBIT,online,Cupertino,CA,US,false
+2026-05-11,WHOLE FOODS MARKET,-94.18,Whole Foods Market,Food and Drink,Groceries,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-05-12,NYTIMES DIGITAL,-17.00,New York Times,News,Digital News,Rewards Card,1944,DEBIT,online,New York,NY,US,false
+2026-05-13,CHEVRON 0209387,-63.44,Chevron,Transportation,Gasoline,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-05-14,DROPBOX PLUS,-19.99,Dropbox,Software,Cloud Storage,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-05-15,EQUINOX PINE STREET,-215.00,Equinox,Fitness,Gym,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-05-17,WALGREENS 11602,-32.18,Walgreens,Health,Pharmacy,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-05-20,AMAZON MKTPLACE PMTS,-78.34,Amazon,Shopping,Online Marketplace,Rewards Card,1944,DEBIT,online,Seattle,WA,US,false
+2026-05-23,SLACK PRO,-12.50,Slack,Software,Productivity,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-05-27,SWEETGREEN MISSION,-18.72,Sweetgreen,Food and Drink,Restaurants,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-06-01,ACME PAYROLL DIRECT DEP,6425.00,Acme Corporation,Income,Payroll,Everyday Checking,4821,CREDIT,ach,San Francisco,CA,US,false
+2026-06-02,CRYSTAL SPRINGS APARTMENTS,-2850.00,Crystal Springs Apartments,Housing,Rent,Everyday Checking,4821,DEBIT,ach,San Francisco,CA,US,false
+2026-06-03,NETFLIX.COM 408724,-22.99,Netflix,Entertainment,Streaming,Rewards Card,1944,DEBIT,online,Los Gatos,CA,US,false
+2026-06-04,TRADER JOES 123,-112.09,Trader Joes,Food and Drink,Groceries,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-06-05,PG AND E WEB PAYMENT,-132.87,Pacific Gas and Electric,Utilities,Electricity,Everyday Checking,4821,DEBIT,online,San Francisco,CA,US,false
+2026-06-06,SPOTIFY USA,-11.99,Spotify,Entertainment,Music,Rewards Card,1944,DEBIT,online,New York,NY,US,false
+2026-06-08,ADOBE CREATIVE CLOUD,-59.99,Adobe,Software,Creative Tools,Rewards Card,1944,DEBIT,online,San Jose,CA,US,false
+2026-06-09,LYFT RIDE,-21.31,Lyft,Transportation,Rideshare,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-06-10,APPLE.COM BILL ICLOUD,-9.99,Apple iCloud,Software,Cloud Storage,Rewards Card,1944,DEBIT,online,Cupertino,CA,US,false
+2026-06-11,COSTCO WHSE 0144,-184.63,Costco,Food and Drink,Groceries,Rewards Card,1944,DEBIT,in store,South San Francisco,CA,US,false
+2026-06-12,NYTIMES DIGITAL,-17.00,New York Times,News,Digital News,Rewards Card,1944,DEBIT,online,New York,NY,US,false
+2026-06-14,DROPBOX PLUS,-19.99,Dropbox,Software,Cloud Storage,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-06-15,EQUINOX PINE STREET,-215.00,Equinox,Fitness,Gym,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-06-18,UNITED AIRLINES 016238,-486.21,United Airlines,Travel,Airfare,Rewards Card,1944,DEBIT,online,Chicago,IL,US,false
+2026-06-20,AIRBNB RESERVATION,-642.80,Airbnb,Travel,Lodging,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-06-23,SLACK PRO,-12.50,Slack,Software,Productivity,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-06-26,DOORDASH DASHPASS,-9.99,DoorDash,Food and Drink,Delivery Membership,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-06-28,BLUE BOTTLE COFFEE,-7.85,Blue Bottle Coffee,Food and Drink,Coffee,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-07-01,ACME PAYROLL DIRECT DEP,6425.00,Acme Corporation,Income,Payroll,Everyday Checking,4821,CREDIT,ach,San Francisco,CA,US,false
+2026-07-02,CRYSTAL SPRINGS APARTMENTS,-2850.00,Crystal Springs Apartments,Housing,Rent,Everyday Checking,4821,DEBIT,ach,San Francisco,CA,US,false
+2026-07-03,NETFLIX.COM 408724,-24.99,Netflix,Entertainment,Streaming,Rewards Card,1944,DEBIT,online,Los Gatos,CA,US,false
+2026-07-05,PG AND E WEB PAYMENT,-158.42,Pacific Gas and Electric,Utilities,Electricity,Everyday Checking,4821,DEBIT,online,San Francisco,CA,US,false
+2026-07-06,SPOTIFY USA,-11.99,Spotify,Entertainment,Music,Rewards Card,1944,DEBIT,online,New York,NY,US,false
+2026-07-08,ADOBE CREATIVE CLOUD,-59.99,Adobe,Software,Creative Tools,Rewards Card,1944,DEBIT,online,San Jose,CA,US,false
+2026-07-10,APPLE.COM BILL ICLOUD,-9.99,Apple iCloud,Software,Cloud Storage,Rewards Card,1944,DEBIT,online,Cupertino,CA,US,false
+2026-07-12,NYTIMES DIGITAL,-17.00,New York Times,News,Digital News,Rewards Card,1944,DEBIT,online,New York,NY,US,false
+2026-07-14,DROPBOX PLUS,-19.99,Dropbox,Software,Cloud Storage,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-07-15,EQUINOX PINE STREET,-215.00,Equinox,Fitness,Gym,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-07-16,WHOLE FOODS MARKET,-103.27,Whole Foods Market,Food and Drink,Groceries,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-07-18,UBER TRIP HELP.UBER.COM,-31.22,Uber,Transportation,Rideshare,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-07-20,AMAZON MKTPLACE PMTS,-42.91,Amazon,Shopping,Online Marketplace,Rewards Card,1944,DEBIT,online,Seattle,WA,US,false
+2026-07-21,OPENAI CHATGPT PLUS,-20.00,OpenAI,Software,AI Tools,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-07-23,SLACK PRO,-12.50,Slack,Software,Productivity,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-07-24,DOORDASH DASHPASS,-9.99,DoorDash,Food and Drink,Delivery Membership,Rewards Card,1944,DEBIT,online,San Francisco,CA,US,false
+2026-07-25,BLUE BOTTLE COFFEE,-8.25,Blue Bottle Coffee,Food and Drink,Coffee,Rewards Card,1944,DEBIT,in store,San Francisco,CA,US,false
+2026-07-26,APPLE STORE ONLINE,-1499.00,Apple,Shopping,Electronics,Rewards Card,1944,DEBIT,online,Cupertino,CA,US,true

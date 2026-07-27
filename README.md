@@ -197,8 +197,15 @@ NVIDIA · Google DeepMind · Base44 · Lovable · Koyal AI · NSF
 
 ```
 .
-├── README.md      # this file — event details, rules, deadlines
-├── IDEAS.md       # idea backlog + the one we picked
-├── SUBMISSION.md  # draft the Devpost copy here before pasting
-└── src/           # the actual project
+├── README.md          # project and event overview
+├── SIMPLE_PLAN.md     # incremental product contract
+├── PRODUCT_PLAN.md    # product and architecture direction
+└── spendos/
+    ├── schema.jac     # graph model and deterministic financial logic
+    ├── agent.jac      # typed byLLM investigation and evidence tools
+    ├── endpoints.sv.jac
+    ├── frontend.cl.jac
+    ├── main.jac
+    ├── data/sample_statement.csv
+    └── tests/core_tests.jac
 ```

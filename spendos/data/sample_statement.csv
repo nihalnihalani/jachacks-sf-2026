@@ -1,0 +1,12 @@
+date,description,amount
+2025-01-05,Netflix.com,-22.99
+2025-02-05,NETFLIX.COM 9832,-22.99
+2025-03-05,Netflix recurring,-24.99
+2025-01-12,Disney Plus,-15.99
+2025-02-12,DISNEY PLUS,-15.99
+2025-03-12,Disney Plus recurring,-15.99
+2025-01-18,Dropbox Plus,-19.99
+2025-02-18,DROPBOX PLUS,-19.99
+2025-03-18,Dropbox Plus,-19.99
+2025-03-21,Neighborhood Market,-84.32
+not-a-date,Broken row,-9.00

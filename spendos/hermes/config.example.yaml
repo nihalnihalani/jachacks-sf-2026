@@ -1,0 +1,22 @@
+# Copy only this block into your Hermes config when you are ready.
+# SpendOS and this repository never modify ~/.hermes/config.yaml.
+mcp_servers:
+  spendos:
+    url: "http://host.docker.internal:8765/mcp"
+    enabled: true
+    timeout: 15
+    connect_timeout: 10
+    supports_parallel_tool_calls: false
+    tools:
+      include:
+        - get_financial_snapshot
+        - list_purchase_proposals
+        - check_purchase_preflight
+        - propose_purchase
+        - list_pending_approvals
+        - list_shopping_missions
+        - claim_shopping_mission
+        - submit_shopping_candidate
+        - complete_shopping_mission
+      resources: false
+      prompts: false

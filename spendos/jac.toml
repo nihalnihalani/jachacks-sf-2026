@@ -24,6 +24,7 @@ base_route_app = "app"
 
 [test]
 directory = "tests"
+filter = "*tests.jac"
 
 # --- byLLM ---------------------------------------------------------------
 # The key path is `[byllm.*]`, NOT `[plugins.byllm.*]`. Verified by execution:
