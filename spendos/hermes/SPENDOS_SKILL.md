@@ -1,6 +1,6 @@
 ---
 name: spendos-financial-guardian
-description: Route Discord requests to buy, order, shop for, or get products through SpendOS financial checks and the live Chrome shopping workflow.
+description: Execute concise Discord shopping commands such as "buy half a dozen chocolate bars from Target" through SpendOS financial checks, verified live-browser cart operations, bounded checkout authorization, and real-time progress reporting.
 ---
 
 # SpendOS Financial Guardian
@@ -8,6 +8,29 @@ description: Route Discord requests to buy, order, shop for, or get products thr
 Use SpendOS as the authoritative financial policy and evidence system. Hermes
 may reason about a user's stated goal, but it must not invent balances,
 subscription evidence, approval, or authority.
+
+## Shopping command contract
+
+Treat one concise message as the complete shopping request. Do not ask the user
+to restate information already present.
+
+- `find`, `research`, or `show me` authorizes research only.
+- `add to cart` or `prepare` authorizes research and a verified cart change.
+- `buy`, `purchase`, or `order` authorizes research, a verified cart change,
+  and checkout up to the lower of the user's stated maximum or the configured
+  $25 default ceiling.
+- Parse colloquial quantities deterministically: half a dozen is 6, a dozen is
+  12, and a pair is 2.
+- Prefer an exact multipack matching the requested unit count. Otherwise buy
+  the minimum number of identical packages that produces the exact requested
+  count. Do not silently overbuy.
+- Honor the named merchant. Never substitute another merchant without asking.
+- When brand, flavor, or fulfillment is omitted, choose a mainstream,
+  non-recurring option with the lowest verified delivered total that satisfies
+  the request. Prefer pickup at the configured store when shipping minimums
+  would materially increase cost.
+- Never add a warranty, membership, recurring delivery, donation, tip, or
+  unrelated item unless the user explicitly requested it.
 
 ## Required workflow
 
@@ -25,16 +48,16 @@ subscription evidence, approval, or authority.
 1. When a user directly asks Hermes to shop, call `start_shopping_request` with
    their exact request and a maximum budget.
 2. If the request has no maximum budget, create a research-and-cart mission
-   using a conservative $25 provisional ceiling. This ceiling authorizes only
-   product research and cart preparation, never checkout. Ask the user to
-   approve the exact final total before any irreversible merchant action.
+   using the configured $25 default ceiling. For a message using `buy`,
+   `purchase`, or `order`, the ceiling is also checkout authorization when the
+   exact final total remains at or below it and SpendOS returns `SAFE`.
 3. Claim only a mission that SpendOS created by calling
    `claim_shopping_mission`.
 4. Research products within the mission's stated budget and preferences.
 5. Return evidence-backed options with `submit_shopping_candidate`.
 6. Disclose tax, shipping, minimum-order requirements, and every recurring cost.
 7. Call `complete_shopping_mission` after returning at least one candidate.
-8. Never treat a shopping mission as checkout authorization.
+8. Treat checkout as authorized only under the Shopping command contract.
 
 ## Discord-triggered shopping
 
@@ -47,12 +70,31 @@ When a Discord message asks to buy, order, shop for, find, or get a product:
 4. Use the live browser tools for the named merchant and call
    `browser_screenshot` after every meaningful state change so SpendOS shows the
    work in real time.
-5. Submit the selected item, quantity, price, merchant URL, availability, and
+5. Add the selected item only after checking its product identity, package
+   count, fulfillment method, and displayed price.
+6. Verify the cart transactionally:
+   - capture cart contents before the action;
+   - click the exact product's Add control;
+   - wait for the merchant's UI confirmation;
+   - open the cart and verify product title or ID, requested total unit count,
+     unit/package quantity, and price;
+   - if verification fails, retry once from the product-detail page;
+   - never claim cart success from a click or cart-count change alone.
+7. Submit the verified item, quantity, price, merchant URL, availability, and
    delivery estimate as a shopping candidate.
-6. If login, CAPTCHA, address confirmation, payment confirmation, or the final
-   order button is reached, call `browser_request_takeover`. Tell the user
-   exactly what is waiting in SpendOS.
-7. After the merchant confirms the order, record only the confirmation and ETA
+8. For an authorized `buy`, run `check_purchase_preflight` again using the exact
+   final total immediately before the final order action.
+9. Continue checkout automatically only when all are true:
+   - the final total is at or below the authorized ceiling;
+   - SpendOS returns `SAFE`;
+   - the cart contains only the requested merchandise;
+   - no subscription, membership, warranty, donation, tip, or unrelated item
+     was added;
+   - merchant authentication and payment are already available in the browser;
+   - no CAPTCHA, 2FA, credential entry, CVV entry, or address ambiguity exists.
+10. If any condition fails, call `browser_request_takeover` and state the exact
+    unresolved condition. Never ask Hermes to reveal or type stored secrets.
+11. After the merchant confirms the order, record only the confirmation and ETA
    actually displayed by the merchant. Never infer success from a click.
 
 ## Simulated shopping demo
@@ -90,8 +132,9 @@ For a configured local demo catalog:
 - Never claim SpendOS connected to a bank when the snapshot came from CSV data.
 - Never infer that a subscription is unused from payment history alone.
 - Never transfer money or communicate with a merchant outside the shopping
-  workflow. Never click a final order button without explicit approval of the
-  exact final total during the active mission.
+  workflow. A concise `buy`, `purchase`, or `order` command is explicit
+  authorization only within the Shopping command contract and configured
+  ceiling.
 - Never ask for or store bank credentials in Hermes memory.
 - Never bypass a `BLOCK` or alter financial arithmetic.
 - Never describe a simulated or proposed action as completed.

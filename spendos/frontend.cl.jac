@@ -1296,11 +1296,11 @@ def:pub AgentCenter(
 
 def:pub LiveAgentActivity(events: list[AgentActivityEvent]) -> JsxElement {
     preview_events: list[AgentActivityEvent] = [
-        event for event in events if event.preview_url
+        event
+        for event in events
+        if event.preview_url
     ];
-    latest_preview: str = (
-        preview_events[0].preview_url if preview_events else ""
-    );
+    latest_preview: str = preview_events[0].preview_url if preview_events else "";
     return
         <section className="live-agent-screen">
             <div className="live-agent-hero">
@@ -1317,16 +1317,48 @@ def:pub LiveAgentActivity(events: list[AgentActivityEvent]) -> JsxElement {
                 </div>
             </div>
             <div className="live-agent-grid">
+                <section className="live-agent-browser">
+                    <div className="section-heading">
+                        <div>
+                            <div className="step-label">Live browser stream</div>
+                            <h2>Live Agent's Browser</h2>
+                        </div>
+                        <StatusPill
+                            label={"Streaming" if latest_preview else "Waiting"}
+                            tone={"safe" if latest_preview else "neutral"}
+                        />
+                    </div>
+                    {latest_preview
+                    and <div className="browser-preview">
+                        <div className="browser-preview-bar">
+                            <span/>
+                            <span/>
+                            <span/>
+                            <strong>Live Agent's Browser</strong>
+                        </div>
+                        <img
+                            src={latest_preview}
+                            alt="Live browser viewport controlled by the shopping agent"
+                        />
+                    </div>}
+                    {not latest_preview
+                    and <div className="browser-waiting">
+                        <span className="activity-pulse"/>
+                        <div>
+                            <strong>Waiting for the agent's browser</strong>
+                            <p>
+                                The live website will appear here when Hermes starts browsing.
+                            </p>
+                        </div>
+                    </div>}
+                </section>
                 <section className="activity-timeline">
                     <div className="section-heading">
                         <div>
                             <div className="step-label">Live execution trace</div>
-                            <h2>What the agent is doing</h2>
+                            <h2>Live Execution Trace</h2>
                         </div>
-                        <StatusPill
-                            label={str(len(events)) + " events"}
-                            tone="safe"
-                        />
+                        <StatusPill label={str(len(events)) + " events"} tone="safe"/>
                     </div>
                     {not events
                     and <div className="activity-waiting">
@@ -1360,30 +1392,6 @@ def:pub LiveAgentActivity(events: list[AgentActivityEvent]) -> JsxElement {
                         }}
                     </div>
                 </section>
-                <aside className="live-agent-boundary">
-                    {latest_preview
-                    and <div className="browser-preview">
-                        <div className="browser-preview-bar">
-                            <span/><span/><span/>
-                            <strong>Live Chrome</strong>
-                        </div>
-                        <img
-                            src={latest_preview}
-                            alt="Live Chrome viewport controlled by Hermes"
-                        />
-                    </div>}
-                    <div className="step-label">Authority boundary</div>
-                    <h3>Visible and safe by design</h3>
-                    <ul>
-                        <li><strong>Hermes</strong> researches stores and products.</li>
-                        <li><strong>SpendOS</strong> computes affordability and policy.</li>
-                        <li><strong>You</strong> approve anything that needs judgment.</li>
-                    </ul>
-                    <div className="simulation-stamp">SIMULATION ONLY</div>
-                    <p>
-                        Walmart, Target, and Amazon results must come from verified provider tools. Local catalog results are labeled simulated.
-                    </p>
-                </aside>
             </div>
         </section>;
 }
@@ -2055,7 +2063,7 @@ def:pub app -> JsxElement {
                                 "feed",
                                 "import",
                                 "findings",
-                                                            "actions"
+                                "actions"
                             ]
                             else "nav-item"}
                         onClick={show_agent}
@@ -2183,8 +2191,7 @@ def:pub app -> JsxElement {
                     onFeed={start_feed}
                     onFindings={show_findings}
                 />}
-                {mode == "live_agent"
-                and <LiveAgentActivity events={agentEvents}/>}
+                {mode == "live_agent" and <LiveAgentActivity events={agentEvents}/>}
                 {mode == "legacy_overview"
                 and <section>
                     {not dashboard.has_data

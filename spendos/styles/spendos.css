@@ -555,11 +555,11 @@ body { color: var(--text); background: var(--canvas); }
     width: 9px; height: 9px; border-radius: 999px; background: #58e5a6;
     box-shadow: 0 0 0 5px rgba(88,229,166,.14); animation: liveBlink 1.5s ease-in-out infinite;
 }
-.live-agent-grid { display: grid; grid-template-columns: minmax(0,1fr) 290px; align-items: start; gap: 20px; }
-.activity-timeline,.live-agent-boundary {
+.live-agent-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 20px; }
+.activity-timeline,.live-agent-browser {
     border: 1px solid var(--line); border-radius: 26px; background: white; box-shadow: var(--shadow-sm);
 }
-.activity-timeline { padding: 22px; }
+.activity-timeline,.live-agent-browser { padding: 22px; }
 .activity-waiting {
     display: flex; align-items: center; gap: 16px; min-height: 150px; padding: 20px;
     border: 1px dashed #b9d4cc; border-radius: 20px; color: var(--muted); background: #f6fbf9;
@@ -581,33 +581,33 @@ body { color: var(--text); background: var(--canvas); }
 .activity-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .activity-event h3 { margin: 5px 0 3px; font-size: 16px; }
 .activity-event small { display: inline-block; margin-top: 7px; color: #6f729e; font-family: ui-monospace,SFMono-Regular,Menlo,monospace; }
-.live-agent-boundary { position: sticky; top: 20px; padding: 22px; }
 .browser-preview {
-    margin: -8px -8px 20px; overflow: hidden; border: 1px solid #d8e2df;
-    border-radius: 17px; background: #eef3f1; box-shadow: 0 10px 24px rgba(27,68,60,.12);
+    overflow: hidden; border: 1px solid #d8e2df;
+    border-radius: 20px; background: #eef3f1; box-shadow: 0 10px 24px rgba(27,68,60,.12);
 }
 .browser-preview-bar {
-    display: flex; align-items: center; gap: 5px; padding: 9px 10px;
-    color: #61706c; background: #f7faf9; font-size: 10px;
+    display: flex; align-items: center; gap: 7px; padding: 12px 14px;
+    color: #61706c; background: #f7faf9; font-size: 12px;
 }
-.browser-preview-bar span { width: 7px; height: 7px; border-radius: 99px; background: #d0d8d5; }
+.browser-preview-bar span { width: 9px; height: 9px; border-radius: 99px; background: #d0d8d5; }
 .browser-preview-bar span:first-child { background: #ef776f; }
 .browser-preview-bar span:nth-child(2) { background: #f3c65d; }
 .browser-preview-bar span:nth-child(3) { background: #63c887; }
 .browser-preview-bar strong { margin-left: 5px; }
-.browser-preview img { display: block; width: 100%; max-height: 310px; object-fit: cover; object-position: top; }
-.live-agent-boundary h3 { margin: 6px 0 16px; }
-.live-agent-boundary ul { display: grid; gap: 13px; padding-left: 18px; color: var(--muted); }
-.simulation-stamp {
-    margin: 20px 0 12px; padding: 12px; border: 1px solid #e3c96d; border-radius: 12px;
-    color: #6f5810; background: #fff8d9; font-size: 12px; font-weight: 900; letter-spacing: .13em; text-align: center;
+.browser-preview img {
+    display: block; width: 100%; min-height: 420px; max-height: 680px;
+    aspect-ratio: 16 / 9; object-fit: contain; object-position: top; background: #eef3f1;
 }
-.live-agent-boundary p { color: var(--muted); font-size: 13px; }
+.browser-waiting {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    min-height: 420px; padding: 28px; border: 1px dashed #b9d4cc;
+    border-radius: 20px; color: var(--muted); background: #f6fbf9; text-align: left;
+}
+.browser-waiting p { margin: 4px 0 0; }
 @keyframes liveBlink { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .48; transform: scale(.85); } }
 @media (max-width: 780px) {
-    .live-agent-grid { grid-template-columns: 1fr; }
     .live-agent-hero { flex-direction: column; }
-    .live-agent-boundary { position: static; }
+    .browser-preview img,.browser-waiting { min-height: 260px; }
 }
 
 /* ==========================================================================
@@ -684,7 +684,7 @@ body { color: var(--text); background: var(--canvas); }
 .calendar-card, .agent-hero, .agent-boundary, .mobile-cta-card,
 .feed-control-card, .feed-activity-card, .feed-stream-card,
 .budget-card, .safe-card, .purchase-form, .approval-inbox,
-.shopping-form, .mission-inbox, .activity-timeline, .live-agent-boundary,
+.shopping-form, .mission-inbox, .activity-timeline, .live-agent-browser,
 .case-card, .action-card, .import-card, .preview-card {
     animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -958,4 +958,3 @@ body { color: var(--text); background: var(--canvas); }
         transition-duration: 0.01ms !important;
     }
 }
-
