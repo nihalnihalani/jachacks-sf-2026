@@ -947,4 +947,15 @@ body { color: var(--text); background: var(--canvas); }
 .grouped-card > .insight-row:nth-child(4) { animation-delay: 0.20s; }
 .grouped-card > .insight-row:nth-child(5) { animation-delay: 0.25s; }
 
+/* Respect the operating-system accessibility preference. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
 
