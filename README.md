@@ -8,6 +8,7 @@
 [![byLLM](https://img.shields.io/badge/byLLM-ReAct%20%2B%20tools-6f4fd6?style=for-the-badge)](https://docs.jaseci.org/)
 [![Object-Spatial](https://img.shields.io/badge/OSP-5%20walkers%20%C2%B7%2020%20nodes%20%C2%B7%2014%20typed%20edges-2b8a67?style=for-the-badge)](https://docs.jaseci.org/reference/)
 [![Full-stack Jac](https://img.shields.io/badge/frontend-written%20in%20Jac-1f6feb?style=for-the-badge)](https://docs.jaseci.org/)
+[![Tests](https://img.shields.io/badge/tests-28%20passing-2b8a67?style=for-the-badge)](spendos/tests)
 [![JacHacks SF](https://img.shields.io/badge/JacHacks-SF%202026-black?style=for-the-badge)](https://jachacks-sf.devpost.com/)
 
 *Built at **JacHacks San Francisco 2026** — one day, in Jac.*
@@ -250,13 +251,14 @@ flowchart LR
 curl -fsSL https://raw.githubusercontent.com/jaseci-labs/jaseci/main/scripts/install.sh | bash
 
 cd spendos
-jac test tests/            # deterministic, no API key needed
+jac test                   # 28 passing, deterministic, no API key needed
 jac start -d               # UI + API. The -d is REQUIRED.
 ```
 
-> ⚠️ **`jac start -d`, not `jac start`.** Bare `jac start` runs no client build and
-> serves the API only — every `GET /` returns 404. Read the `App:` line in the log
-> for the real port; it drifts if one is already held.
+> ⚠️ **`jac start -d`, not `jac start`.** Bare `jac start` *does* build the client
+> bundle — but it does not mount it at the root: `GET /` and `/app` return **404**
+> (only `/cl/app` serves). With `-d`, `/` returns 200. Read the `App:` line in the
+> log for the real port; it drifts if one is already held.
 
 > ⚠️ **Do not `pip install byllm`.** It ships inside the `jac` binary; a pip copy
 > shadows it and breaks imports.
