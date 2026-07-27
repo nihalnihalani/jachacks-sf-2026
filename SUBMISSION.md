@@ -1,3 +1,16 @@
+> # ⚠️ SUPERSEDED — DO NOT SUBMIT THIS
+>
+> This document describes an **earlier architecture** (an authorization firewall
+> with `CapGate` / `VelocityGate` / `SanctionsGate` / `TribunalGate`, an edge
+> ability metering a `Funds` edge, and a `trace_provenance` tool). **None of it
+> exists in `spendos/`** — the project pivoted, and those files were removed.
+>
+> Kept only as a record of the earlier design. The live submission copy is
+> **[SPENDOS_DEVPOST.md](SPENDOS_DEVPOST.md)**; the current architecture is in
+> **[README.md](README.md)**, where every construct claim carries a file:line.
+
+---
+
 # SpendOS — Devpost submission draft
 
 **Partial submission due 5:50 PM PT. Final 7:15 PM PT.**
