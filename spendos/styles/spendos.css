@@ -1064,6 +1064,106 @@ body { color: var(--text); background: var(--canvas); }
     transform: scale(1.005);
 }
 
+/* ==========================================================================
+   ENTERPRISE SAAS PRODUCT-GRADE FINISHING TOUCHES
+   ========================================================================== */
+
+/* High-End Brand Logo Styling & Lockup */
+.brand-mark {
+    background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-700) 100%) !important;
+    box-shadow: 0 4px 12px rgba(31, 106, 91, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.brand-lockup {
+    border-bottom: 1px solid rgba(220, 226, 221, 0.4);
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+}
+
+.brand-lockup strong {
+    font-size: 15.5px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    color: #1a2a21;
+}
+
+.brand-lockup span {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: #7b837c;
+}
+
+/* Elegant status panel in sidebar footer */
+.guardian-status {
+    margin-top: auto;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(238, 245, 239, 0.55);
+    border: 1px solid rgba(216, 226, 217, 0.65);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.guardian-status:hover {
+    background: rgba(238, 245, 239, 0.85);
+    border-color: rgba(31, 106, 91, 0.18);
+}
+
+/* danger-themed polished reset controller */
+.reset-link {
+    font-size: 10.5px;
+    font-weight: 650;
+    color: #818982;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    margin: 4px 12px 12px;
+}
+
+.reset-link:hover {
+    color: #aa463d;
+    background: rgba(170, 70, 61, 0.05);
+    border-color: rgba(170, 70, 61, 0.15);
+}
+
+/* Refined hero finance card with subtle glass gloss overlay */
+.hero-finance-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(31, 106, 91, 0.12);
+    box-shadow: 0 12px 32px rgba(31, 106, 91, 0.06), 0 1px 3px rgba(31, 106, 91, 0.04);
+}
+
+.hero-finance-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, transparent 40%);
+    pointer-events: none;
+}
+
+/* Responsive spacing optimizations for mobile screens */
+@media (max-width: 980px) {
+    .main { 
+        padding: 24px 16px 80px !important; 
+    }
+    .topbar { 
+        margin: -24px -16px 20px !important; 
+        padding: 24px 16px 20px !important; 
+    }
+}
+
 
 /* Respect the operating-system accessibility preference. */
 @media (prefers-reduced-motion: reduce) {
