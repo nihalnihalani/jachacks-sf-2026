@@ -12,6 +12,7 @@ access to raw statements or credentials.
 
 ## Safe tool surface
 
+- `start_shopping_request` — creates a research-only mission from Hermes
 - `get_financial_snapshot` — summarized budget and subscription totals
 - `list_purchase_proposals` — previously recorded proposals
 - `check_purchase_preflight` — non-persistent budget-impact preview
@@ -21,9 +22,14 @@ access to raw statements or credentials.
 - `claim_shopping_mission` — assigns a research mission to Hermes
 - `submit_shopping_candidate` — returns one evidence-backed option
 - `complete_shopping_mission` — marks returned research ready for review
+- `resolve_products`, `add_to_cart`, `view_cart`, and `simulate_order` —
+  simulated catalog, cart, and order tools
+- `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_type`,
+  `browser_screenshot`, and `browser_request_takeover` — constrained live
+  research with mandatory takeover for secrets and consequential checkout
 
-There are deliberately no approve, purchase, cancellation, bank, transfer, or
-communication tools.
+There are deliberately no approval, autonomous real-purchase, cancellation,
+bank, transfer, payment-credential, or merchant-communication tools.
 
 ## Run and verify
 
@@ -42,9 +48,59 @@ SPENDOS_API_URL=http://127.0.0.1:8012 \
   /usr/bin/python3 hermes/smoke_test.py
 ```
 
-The test performs MCP initialization, verifies the exact tool allowlist, rejects
-unsafe tool names, and calls the live SpendOS financial snapshot. It does not
-create a proposal.
+The smoke test performs MCP initialization, verifies the exact 20-tool
+allowlist, rejects unsafe tool names, and calls the live SpendOS financial
+snapshot. It does not create a proposal.
+
+To exercise the complete two-way demo loop against the running HTTP bridge:
+
+```bash
+/usr/bin/python3 hermes/integration_test.py
+```
+
+This creates a local shopping mission, claims it as Hermes, searches the bundled
+simulated catalog, returns evidence, verifies a cart and preflight, and creates
+a `SIMULATED` order. It never contacts a merchant or uses payment data.
+
+## Connect a live Chrome browser
+
+The six browser tools use Chrome DevTools Protocol through the dependency-free
+`browser_worker.mjs`. They support ordinary HTTP and HTTPS sites, visible-page
+snapshots, non-secret form entry, ordinary clicks, and viewport screenshots.
+Password fields and consequential checkout controls return `NEEDS_USER`.
+The SpendOS Live tab consumes `/stream.mjpg` for a continuously refreshed
+Chrome viewport while the structured MCP event timeline remains auditable.
+
+Chrome must start with a remote-debugging port. Fully quit Chrome first, then
+start it with:
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$HOME/Library/Application Support/SpendOS Chrome"
+```
+
+Chrome 136 and later require a non-default `--user-data-dir` for remote
+debugging. This is a Chrome security requirement, even for local testing.
+
+Start the browser worker:
+
+```bash
+SPENDOS_CDP_URL=http://127.0.0.1:9222 \
+  node hermes/browser_worker.mjs
+```
+
+Then start the MCP bridge as described above. Verify both services:
+
+```bash
+curl http://127.0.0.1:9223/health
+curl http://127.0.0.1:8765/health
+```
+
+The browser worker does not read Chrome cookies, local storage, password
+manager data, or authorization headers. It cannot guarantee operation on every
+website: CAPTCHA, 2FA, cross-origin frames, browser extensions, and website
+changes can require user takeover.
 
 ## Run for the installed Docker Hermes
 
@@ -85,7 +141,7 @@ docker exec -it hermes hermes mcp configure spendos
 For an auditable manual setup, merge the `spendos` block from
 `config.example.yaml` into your Hermes configuration. Do not replace the entire
 file. The sample explicitly disables MCP resources and prompts and allowlists
-only the nine tools above.
+only the twenty tools above.
 
 Copy `SPENDOS_SKILL.md` into the Hermes skill location appropriate to your
 installation, or include its rules in the agent's context. It defines the

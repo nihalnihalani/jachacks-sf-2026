@@ -582,6 +582,20 @@ body { color: var(--text); background: var(--canvas); }
 .activity-event h3 { margin: 5px 0 3px; font-size: 16px; }
 .activity-event small { display: inline-block; margin-top: 7px; color: #6f729e; font-family: ui-monospace,SFMono-Regular,Menlo,monospace; }
 .live-agent-boundary { position: sticky; top: 20px; padding: 22px; }
+.browser-preview {
+    margin: -8px -8px 20px; overflow: hidden; border: 1px solid #d8e2df;
+    border-radius: 17px; background: #eef3f1; box-shadow: 0 10px 24px rgba(27,68,60,.12);
+}
+.browser-preview-bar {
+    display: flex; align-items: center; gap: 5px; padding: 9px 10px;
+    color: #61706c; background: #f7faf9; font-size: 10px;
+}
+.browser-preview-bar span { width: 7px; height: 7px; border-radius: 99px; background: #d0d8d5; }
+.browser-preview-bar span:first-child { background: #ef776f; }
+.browser-preview-bar span:nth-child(2) { background: #f3c65d; }
+.browser-preview-bar span:nth-child(3) { background: #63c887; }
+.browser-preview-bar strong { margin-left: 5px; }
+.browser-preview img { display: block; width: 100%; max-height: 310px; object-fit: cover; object-position: top; }
 .live-agent-boundary h3 { margin: 6px 0 16px; }
 .live-agent-boundary ul { display: grid; gap: 13px; padding-left: 18px; color: var(--muted); }
 .simulation-stamp {

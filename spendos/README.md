@@ -133,12 +133,16 @@ execute an action, and it never owns financial arithmetic.
 
 ## Hermes Agent
 
-SpendOS exposes a narrow nine-tool MCP adapter for Hermes. Five tools cover
-financial snapshot and purchase-proposal preflight. Four additional tools form
-a two-way research loop: SpendOS dispatches a shopping mission, Hermes claims
-it, returns evidence-backed candidates, and marks the mission ready for human
-review. It deliberately exposes no approve, checkout, purchase, cancellation,
-transfer, bank-login, or merchant-contact tool.
+SpendOS exposes a twenty-tool MCP adapter for Hermes. Six tools cover
+financial snapshots, purchase-proposal preflight, and approval queues. Four
+tools form a two-way research loop: SpendOS dispatches a shopping mission,
+Hermes claims it, returns evidence-backed candidates, and marks the mission
+ready for human review. Four additional tools search the bundled simulated
+catalog, build and verify a local cart, and create a clearly labeled simulated
+order. Six browser tools connect to a Chrome CDP worker for live research,
+visible-page snapshots, non-secret form entry, ordinary clicks, screenshots,
+and explicit user takeover. It deliberately exposes no approval, real checkout, cancellation,
+transfer, bank-login, payment-credential, or merchant-contact tool.
 
 Run the bridge beside SpendOS:
 
