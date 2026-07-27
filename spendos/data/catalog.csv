@@ -1,0 +1,8 @@
+store,product_id,name,brand,size,price,currency,in_stock
+Instacart,inst-potato-1kg,Potato,Fresh Farms,1 kg,3.49,USD,true
+Instacart,inst-onion-1lb,Yellow Onion,Fresh Farms,1 lb,1.29,USD,true
+Instacart,inst-tomato-1lb,Roma Tomato,Fresh Farms,1 lb,2.19,USD,true
+Instacart,inst-avocado-4pk,Avocado,Fresh Farms,4 pack,4.99,USD,false
+Instacart,inst-milk-1gal,Whole Milk,Meadow Gold,1 gallon,3.79,USD,true
+Instacart,inst-bread-1loaf,Sourdough Bread,Baker Street,1 loaf,4.29,USD,true
+Instacart,inst-eggs-1dozen,Eggs,Happy Hen,1 dozen,3.99,USD,true
