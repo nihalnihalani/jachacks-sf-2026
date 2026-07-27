@@ -6,7 +6,7 @@
 
 [![Built with Jac](https://img.shields.io/badge/built%20with-Jac%200.34.5-e8a838?style=for-the-badge)](https://www.jac-lang.org/)
 [![byLLM](https://img.shields.io/badge/byLLM-ReAct%20%2B%20tools-6f4fd6?style=for-the-badge)](https://docs.jaseci.org/)
-[![Object-Spatial](https://img.shields.io/badge/OSP-5%20walkers%20%C2%B7%2020%20nodes%20%C2%B7%2014%20typed%20edges-2b8a67?style=for-the-badge)](https://docs.jaseci.org/reference/)
+[![Object-Spatial](https://img.shields.io/badge/OSP-5%20walkers%20%C2%B7%2020%20nodes%20%C2%B7%206%20load--bearing%20edges-2b8a67?style=for-the-badge)](https://docs.jaseci.org/reference/)
 [![Full-stack Jac](https://img.shields.io/badge/frontend-written%20in%20Jac-1f6feb?style=for-the-badge)](https://docs.jaseci.org/)
 [![Tests](https://img.shields.io/badge/tests-28%20passing-2b8a67?style=for-the-badge)](spendos/tests)
 [![JacHacks SF](https://img.shields.io/badge/JacHacks-SF%202026-black?style=for-the-badge)](https://jachacks-sf.devpost.com/)
@@ -43,10 +43,10 @@ ones that survive being probed, and every one has a line number.
 | # | Construct | Where | What it does *here* |
 |---|---|---|---|
 | 1 | **Walkers** (`walker:pub`) | `endpoints.sv.jac:793, 886, 970, 1124, 1218` | 5 walkers traverse the ledger; computation moves to the data |
-| 2 | **Filtered traversal** | `endpoints.sv.jac:890, 975` | `visit [here-->[?:Subscription, subscription_id==self.subscription_id]]` — type *and* field filter in the itinerary |
+| 2 | **Filtered traversal** | `endpoints.sv.jac:975, 1130, 1222` | `visit [here-->[?:Subscription, subscription_id==self.subscription_id]]` — type **and field** filter in the itinerary, so an unknown id yields zero visits instead of raising. (`:890` is a type-only fan-out.) |
 | 3 | **`disengage`** | `endpoints.sv.jac:802, 814, 986` | A walker stops the instant its work is done; the node it stopped on is the record |
 | 4 | **`by llm(tools=[...])`** | `agent.jac:72` | A real ReAct loop — the **model** chooses which of 5 evidence tools to call, up to 6 turns |
-| 5 | **Typed nodes + edges** | `schema.jac`, `purchase.jac` | 20 nodes, 14 typed edges; `RecursAs` carries `match_confidence` |
+| 5 | **Typed nodes + edges** | `schema.jac`, `purchase.jac` | 20 nodes and 14 declared edge types, of which **6 are load-bearing** (created *and* traversed): `Contains`, `PaidTo`, `RecursAs`, `CaseFor`, `ActsOn`, `Holds`. `RecursAs` carries `match_confidence` **on the edge** and is traversed in both directions. The rest are written but not yet read back. |
 | 6 | **One project, two artifacts** | `main.jac`, `frontend.cl.jac`, `endpoints.sv.jac` | `.cl.jac` compiles to React, `.sv.jac` stays server-side, shared `schema.jac` **is** the wire contract |
 
 The sixth is the one that's hard to appreciate from outside: **the frontend is written
