@@ -19,8 +19,8 @@ The first Subscription Guardian release described below is implemented in
   or `REVIEW`;
 - safe proposals require human approval, warnings cannot self-approve, blocks
   cannot be overridden, and execution remains simulated;
-- Hermes connects through a nine-tool MCP allowlist with no approval or
-  financial-execution capability;
+- Hermes connects through a twenty-tool MCP allowlist with no approval or
+  real financial-execution capability;
 - SpendOS can dispatch a durable shopping mission, Hermes can claim it and
   return structured candidates, and SpendOS independently checks budget and
   recurring-cost violations; and

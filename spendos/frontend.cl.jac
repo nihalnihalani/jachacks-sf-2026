@@ -55,7 +55,8 @@ obj AgentActivityEvent {
         phase: str,
         title: str,
         detail: str,
-        status: str;
+        status: str,
+        preview_url: str = "";
 }
 
 
@@ -1294,6 +1295,12 @@ def:pub AgentCenter(
 }
 
 def:pub LiveAgentActivity(events: list[AgentActivityEvent]) -> JsxElement {
+    preview_events: list[AgentActivityEvent] = [
+        event for event in events if event.preview_url
+    ];
+    latest_preview: str = (
+        preview_events[0].preview_url if preview_events else ""
+    );
     return
         <section className="live-agent-screen">
             <div className="live-agent-hero">
@@ -1354,6 +1361,17 @@ def:pub LiveAgentActivity(events: list[AgentActivityEvent]) -> JsxElement {
                     </div>
                 </section>
                 <aside className="live-agent-boundary">
+                    {latest_preview
+                    and <div className="browser-preview">
+                        <div className="browser-preview-bar">
+                            <span/><span/><span/>
+                            <strong>Live Chrome</strong>
+                        </div>
+                        <img
+                            src={latest_preview}
+                            alt="Live Chrome viewport controlled by Hermes"
+                        />
+                    </div>}
                     <div className="step-label">Authority boundary</div>
                     <h3>Visible and safe by design</h3>
                     <ul>
@@ -1601,7 +1619,8 @@ def:pub app -> JsxElement {
                         phase=str(item["phase"]),
                         title=str(item["title"]),
                         detail=str(item["detail"]),
-                        status=str(item["status"])
+                        status=str(item["status"]),
+                        preview_url=str(item.get("preview_url", ""))
                     );
                     incoming.append(event);
                     if event.id > next_cursor {

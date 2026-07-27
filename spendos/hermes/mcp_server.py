@@ -21,6 +21,9 @@ from typing import Any
 
 
 API_URL = os.environ.get("SPENDOS_API_URL", "http://127.0.0.1:8012").rstrip("/")
+BROWSER_URL = os.environ.get(
+    "SPENDOS_BROWSER_URL", "http://127.0.0.1:9223"
+).rstrip("/")
 PROTOCOL_VERSION = "2025-06-18"
 API_OPENER = urllib.request.build_opener(
     urllib.request.HTTPCookieProcessor(CookieJar())
@@ -31,7 +34,12 @@ ACTIVITY_EVENTS: deque[dict[str, Any]] = deque(maxlen=200)
 
 
 def record_activity(
-    tool: str, phase: str, title: str, detail: str = "", status: str = "active"
+    tool: str,
+    phase: str,
+    title: str,
+    detail: str = "",
+    status: str = "active",
+    preview_url: str = "",
 ) -> dict[str, Any]:
     """Record a display-safe Hermes event without financial payloads or secrets."""
     global ACTIVITY_SEQUENCE
@@ -45,6 +53,7 @@ def record_activity(
             "title": title[:140],
             "detail": detail[:240],
             "status": status,
+            "preview_url": preview_url,
         }
         ACTIVITY_EVENTS.append(event)
         return event
@@ -82,6 +91,18 @@ def activity_description(name: str, arguments: dict[str, Any]) -> tuple[str, str
         return "Creating simulated confirmation", str(arguments.get("store", ""))
     if name == "complete_shopping_mission":
         return "Research ready for review", str(arguments.get("mission_id", ""))
+    if name == "browser_navigate":
+        return "Opening merchant website", str(arguments.get("url", ""))
+    if name == "browser_snapshot":
+        return "Reading the current page", "Inspecting visible content and controls."
+    if name == "browser_click":
+        return "Interacting with the website", str(arguments.get("ref", ""))
+    if name == "browser_type":
+        return "Entering shopping details", str(arguments.get("ref", ""))
+    if name == "browser_screenshot":
+        return "Capturing live browser evidence", "Refreshing the SpendOS browser preview."
+    if name == "browser_request_takeover":
+        return "Waiting for user takeover", str(arguments.get("reason", ""))
     return name.replace("_", " ").title(), "SpendOS tool activity."
 
 
@@ -361,6 +382,88 @@ TOOLS: list[dict[str, Any]] = [
             "idempotentHint": False,
         },
     },
+    {
+        "name": "browser_navigate",
+        "description": (
+            "Open an ordinary HTTP or HTTPS page in the connected Chrome CDP "
+            "session and return a sanitized visible-page snapshot."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "required": ["url"],
+            "properties": {"url": {"type": "string", "minLength": 8}},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False},
+    },
+    {
+        "name": "browser_snapshot",
+        "description": (
+            "Read visible text and interactive element references from the "
+            "connected page. Does not expose cookies, storage, or headers."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "destructiveHint": False},
+    },
+    {
+        "name": "browser_click",
+        "description": (
+            "Click a visible element reference from the latest snapshot. "
+            "Consequential checkout controls return NEEDS_USER."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "required": ["ref"],
+            "properties": {"ref": {"type": "string", "pattern": "^e[0-9]+$"}},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False},
+    },
+    {
+        "name": "browser_type",
+        "description": (
+            "Type non-secret text into a visible form control. Password fields "
+            "return NEEDS_USER and must be completed by the user."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "required": ["ref", "text"],
+            "properties": {
+                "ref": {"type": "string", "pattern": "^e[0-9]+$"},
+                "text": {"type": "string", "maxLength": 4000},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False},
+    },
+    {
+        "name": "browser_screenshot",
+        "description": "Capture the current Chrome viewport for the SpendOS live preview.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "destructiveHint": False},
+    },
+    {
+        "name": "browser_request_takeover",
+        "description": (
+            "Pause browser work and visibly request user takeover for login, "
+            "CAPTCHA, 2FA, payment, checkout, or an unsupported interaction."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "required": ["reason"],
+            "properties": {"reason": {"type": "string", "minLength": 1}},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False},
+    },
 ]
 
 
@@ -390,6 +493,30 @@ def post_function(name: str, body: dict[str, Any]) -> Any:
         error = payload.get("error") or {}
         raise SpendOSError(error.get("message") or "SpendOS rejected the request")
     return payload.get("data", {}).get("result")
+
+
+def call_browser(path: str, body: dict[str, Any]) -> Any:
+    request = urllib.request.Request(
+        f"{BROWSER_URL}/{path}",
+        data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            payload = json.load(response)
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode("utf-8", errors="replace")[:800]
+        raise SpendOSError(
+            f"Browser worker returned HTTP {error.code}: {detail}"
+        ) from error
+    except (urllib.error.URLError, TimeoutError) as error:
+        raise SpendOSError(
+            f"Browser worker is unavailable at {BROWSER_URL}"
+        ) from error
+    if isinstance(payload, dict) and payload.get("status") == "FAILED":
+        raise SpendOSError(str(payload.get("error") or "Browser operation failed"))
+    return payload
 
 
 def dashboard() -> dict[str, Any]:
@@ -538,6 +665,18 @@ def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         result = post_function("view_cart", arguments)
     elif name == "simulate_order":
         result = post_function("simulate_order", arguments)
+    elif name == "browser_navigate":
+        result = call_browser("navigate", arguments)
+    elif name == "browser_snapshot":
+        result = call_browser("snapshot", arguments)
+    elif name == "browser_click":
+        result = call_browser("click", arguments)
+    elif name == "browser_type":
+        result = call_browser("type", arguments)
+    elif name == "browser_screenshot":
+        result = call_browser("screenshot", arguments)
+    elif name == "browser_request_takeover":
+        result = call_browser("takeover", arguments)
     else:
         raise SpendOSError(f"Unknown tool: {name}")
 
@@ -590,12 +729,31 @@ def dispatch(message: dict[str, Any]) -> tuple[Any, Any, Any] | None:
         record_activity(tool_name, "started", title, detail)
         try:
             result = call_tool(tool_name, arguments)
+            structured = result.get("structuredContent", {}).get("result", {})
+            preview_url = (
+                str(structured.get("preview_url", ""))
+                if isinstance(structured, dict)
+                else ""
+            )
+            completion_detail = (
+                str(structured.get("reason", "Browser step completed."))
+                if isinstance(structured, dict)
+                and structured.get("status") == "NEEDS_USER"
+                else "Completed safely. No checkout or payment occurred."
+            )
+            completion_status = (
+                "needs_user"
+                if isinstance(structured, dict)
+                and structured.get("status") == "NEEDS_USER"
+                else "complete"
+            )
             record_activity(
                 tool_name,
                 "completed",
                 title,
-                "Completed safely. No checkout or payment occurred.",
-                "complete",
+                completion_detail,
+                completion_status,
+                preview_url,
             )
             return (
                 request_id,

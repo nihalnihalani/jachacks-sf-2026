@@ -12,6 +12,7 @@ from typing import Any
 
 SERVER = Path(__file__).with_name("mcp_server.py")
 EXPECTED = {
+    "start_shopping_request",
     "get_financial_snapshot",
     "list_purchase_proposals",
     "check_purchase_preflight",
@@ -21,6 +22,16 @@ EXPECTED = {
     "claim_shopping_mission",
     "submit_shopping_candidate",
     "complete_shopping_mission",
+    "resolve_products",
+    "add_to_cart",
+    "view_cart",
+    "simulate_order",
+    "browser_navigate",
+    "browser_snapshot",
+    "browser_click",
+    "browser_type",
+    "browser_screenshot",
+    "browser_request_takeover",
 }
 FORBIDDEN_FRAGMENTS = {"approve", "execute", "cancel", "transfer", "bank"}
 
