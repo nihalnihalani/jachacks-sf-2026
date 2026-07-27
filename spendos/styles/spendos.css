@@ -947,6 +947,124 @@ body { color: var(--text); background: var(--canvas); }
 .grouped-card > .insight-row:nth-child(4) { animation-delay: 0.20s; }
 .grouped-card > .insight-row:nth-child(5) { animation-delay: 0.25s; }
 
+/* ==========================================================================
+   FINAL PRODUCT TIERS: HIGH-END DETAIL, HOVERS & GLOW STATES
+   ========================================================================== */
+
+/* Spend Trend Chart Bar Interactive Physics */
+.spend-trend div {
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spend-trend div:hover {
+    background: linear-gradient(180deg, #8183f0, var(--agent)) !important;
+    transform: scaleX(1.18) scaleY(1.06);
+    box-shadow: 0 6px 18px rgba(91, 92, 226, 0.35);
+}
+
+/* Status Pill Micro-Indicator Pulse Dots */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.pill::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.pill-safe::before {
+    background: #28724a;
+    box-shadow: 0 0 0 2px rgba(40, 114, 74, 0.2);
+    animation: live-pulse 1.8s infinite;
+}
+
+.pill-warn::before {
+    background: #8a6417;
+    box-shadow: 0 0 0 2px rgba(138, 100, 23, 0.2);
+    animation: live-pulse 1.8s infinite;
+}
+
+.pill-danger::before {
+    background: #a13f38;
+    box-shadow: 0 0 0 2px rgba(161, 63, 56, 0.2);
+    animation: live-pulse 1.8s infinite;
+}
+
+/* Floating Animation for Empty State Icons */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.empty-icon {
+    animation: float 3s ease-in-out infinite;
+    box-shadow: 0 8px 24px rgba(31, 104, 91, 0.1);
+}
+
+.empty-hero {
+    background: radial-gradient(circle at 50% 50%, #ffffff 0%, #fbfcf9 100%);
+    border: 1px dashed var(--brand-500);
+}
+
+/* Premium Topbar Gradient Radial Overlay */
+.topbar {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(115deg, var(--brand-700) 0%, #102f2a 50%, var(--brand-500) 100%);
+}
+
+.topbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 82% 20%, rgba(31, 138, 112, 0.2) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+/* Dynamic Hover effects for Subscription Rows */
+.subscription-row {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                background-color 0.2s ease, 
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.subscription-row:hover {
+    transform: translateY(-2px) scale(1.002);
+    background-color: #fafbfc;
+    box-shadow: 0 6px 20px rgba(31, 106, 91, 0.04);
+    border-color: #cbd5cb;
+}
+
+/* Dynamic Primary Button Gradient & Soft Glow Shadow */
+.button-primary {
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-700)) !important;
+    box-shadow: 0 4px 14px rgba(31, 106, 91, 0.2);
+}
+
+.button-primary:hover {
+    background: linear-gradient(135deg, #1d6e5a, var(--brand-700)) !important;
+    box-shadow: 0 6px 20px rgba(31, 106, 91, 0.3);
+}
+
+/* Interactive Input Focus Scaling */
+.budget-card input:focus, .form-grid input:focus, .form-grid select:focus, .shopping-form input:focus, .shopping-form textarea:focus {
+    transform: scale(1.005);
+}
+
+
 /* Respect the operating-system accessibility preference. */
 @media (prefers-reduced-motion: reduce) {
     *,
